@@ -20,6 +20,7 @@ export function Match(property: string, validationOptions?: ValidationOptions) {
           const relatedValue = (validationArguments?.object as any)[
             relatedPropertyName
           ];
+          console.log(value === relatedValue);
           return value === relatedValue;
         },
       },

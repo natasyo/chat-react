@@ -5,30 +5,31 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../../ui/Button.tsx';
 import { registerUser } from '../../functions/api.ts';
 import { AxiosError } from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-const loginSchema = z
-  .object({
-    email: z.email({ message: 'Email is required' }),
-    password: z
-      .string()
-      .min(6, 'Password must be at least 6 characters'),
-    confirmPassword: z
-      .string()
-      .min(6, 'Password must be at least 6 characters'),
-  })
-  .superRefine(({ password, confirmPassword }, ctx) => {
-    if (password !== confirmPassword) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Passwords must match',
-        path: ['confirmPassword', 'password'],
-      });
-    }
-  });
+const loginSchema = z.object({
+  email: z.email({ message: 'Email is required' }),
+  password: z
+    .string()
+    .min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z
+    .string()
+    .min(6, 'Password must be at least 6 characters'),
+});
+// .superRefine(({ password, confirmPassword }, ctx) => {
+//   if (password !== confirmPassword) {
+//     ctx.addIssue({
+//       code: 'custom',
+//       message: 'Passwords must match',
+//       path: ['confirmPassword', 'password'],
+//     });
+//   }
+// });
 
 type RegisterFormData = z.infer<typeof loginSchema>;
 
 const RegisterPage = () => {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -45,6 +46,7 @@ const RegisterPage = () => {
         data.password,
         data.confirmPassword,
       );
+      navigate('/auth/login');
     } catch (error) {
       if (
         error instanceof AxiosError &&
@@ -83,9 +85,14 @@ const RegisterPage = () => {
           type={'password'}
           placeholder={'Confirm Password'}
         />
-        <Button variant={'primary'} type={'submit'}>
-          Register
-        </Button>
+        <div className="flex justify-center items-center">
+          <Button variant={'primary'} type={'submit'}>
+            Register
+          </Button>
+          <a href="/auth/login" className={`mx-5`}>
+            Login
+          </a>
+        </div>
       </form>
     </div>
   );
