@@ -1,10 +1,20 @@
 @import 'tailwindcss';
+
 @theme {
-  --color-bg: #ffffff;
-  --color-text: #000000;
+    --color-bg: #ffffff;
+    --color-text: #000000;
 }
 
-html, body, #root{
+html,
+body,
+#root {
     min-height: 100vh;
 }
+
 @variant dark (&:where(.dark, .dark *));
+h1 {
+    font-size: 100px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 800;
+}

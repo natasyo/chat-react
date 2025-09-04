@@ -6,10 +6,11 @@ export class RegisterDto {
   email: string;
 
   @IsString()
-  @MinLength(6, { message: 'Min length 6' })
+  @MinLength(6, { message: 'Min1 length 6' })
   password: string;
 
   @IsString()
   @Match('password', { message: 'пароли не совпадают' })
+  @MinLength(6, { message: 'Min2 length 6' })
   confirmPassword: string;
 }

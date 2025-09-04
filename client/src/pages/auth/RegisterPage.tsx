@@ -7,26 +7,27 @@ import { registerUser } from '../../functions/api.ts';
 import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const loginSchema = z.object({
-  email: z.email({ message: 'Email is required' }),
-  password: z
-    .string()
-    .min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z
-    .string()
-    .min(6, 'Password must be at least 6 characters'),
-});
-// .superRefine(({ password, confirmPassword }, ctx) => {
-//   if (password !== confirmPassword) {
-//     ctx.addIssue({
-//       code: 'custom',
-//       message: 'Passwords must match',
-//       path: ['confirmPassword', 'password'],
-//     });
-//   }
-// });
+const registerSchema = z
+  .object({
+    email: z.email({ message: 'Email is required' }),
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z
+      .string()
+      .min(6, 'Password must be at least 6 characters'),
+  })
+  .superRefine(({ password, confirmPassword }, ctx) => {
+    if (password !== confirmPassword) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Passwords must match',
+        path: ['confirmPassword', 'password'],
+      });
+    }
+  });
 
-type RegisterFormData = z.infer<typeof loginSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ const RegisterPage = () => {
     setError,
     formState: { errors },
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(registerSchema),
   });
 
   async function RegisterForm(data: RegisterFormData) {
@@ -48,14 +49,36 @@ const RegisterPage = () => {
       );
       navigate('/auth/login');
     } catch (error) {
+      console.log(error);
       if (
         error instanceof AxiosError &&
         error.status === 400
       ) {
-        setError('email', {
-          type: 'serverError',
-          message: 'Email already exists',
-        });
+        if (error.response?.data.message instanceof Array) {
+          error.response?.data.message.map(
+            (err: {
+              field: string;
+              errors: Array<string>;
+            }) => {
+              console.log(err);
+              const field =
+                err.field as keyof RegisterFormData;
+              let messageErr = '';
+              err.errors.map((message) => {
+                messageErr += message + ', ';
+              });
+              console.log(field, messageErr);
+              setError(field, {
+                message: messageErr,
+              });
+            },
+          );
+        } else {
+          setError('email', {
+            type: 'serverError',
+            message: 'Email already exists',
+          });
+        }
       } else {
         console.error(error);
       }
@@ -81,7 +104,7 @@ const RegisterPage = () => {
         />
         <Input
           {...register('confirmPassword')}
-          error={errors.password}
+          error={errors.confirmPassword}
           type={'password'}
           placeholder={'Confirm Password'}
         />

@@ -8,6 +8,7 @@ import {
 import Layout from './Layout.tsx';
 import LoginPage from './pages/auth/LoginPage.tsx';
 import RegisterPage from './pages/auth/RegisterPage.tsx';
+import PrivateRoute from './routes/privateRoute.tsx';
 
 function App() {
   return (
@@ -15,7 +16,9 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<MessagesPage />} />
+            <Route element={<PrivateRoute />}>
+              <Route path="/" element={<MessagesPage />} />
+            </Route>
             <Route
               path="/auth/login"
               element={<LoginPage />}

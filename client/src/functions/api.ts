@@ -19,5 +19,5 @@ export async function loginUser(
   email: string,
   password: string,
 ) {
-  await api.post('/auth/login', { email, password });
+  return await api.post('/auth/login', { email, password });
 }

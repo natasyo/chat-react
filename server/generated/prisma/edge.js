@@ -138,7 +138,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/nik/Desktop/chat-react/server/generated/prisma",
+      "value": "C:\\Users\\pulna\\Desktop\\chat-react\\server\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -147,12 +147,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "windows",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/nik/Desktop/chat-react/server/prisma/schema.prisma",
+    "sourceFilePath": "C:\\Users\\pulna\\Desktop\\chat-react\\server\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
