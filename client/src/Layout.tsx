@@ -9,7 +9,7 @@ type LayoutProps = {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div
-      className={`flex flex-col w-full justify-between h-screen bg-white dark:bg-gray-800 dark:text-white`}
+      className={`flex flex-col w-full justify-between bg-white dark:bg-gray-800 dark:text-white`}
     >
       <Header />
       <div className="grow">{children}</div>

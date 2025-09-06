@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import * as process from 'node:process';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,20 @@ export class AuthService {
     if (!isMatch) throw new UnauthorizedException();
     const payload = { sub: user.id, email: user.email };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: await this.jwtService.signAsync(payload, {
+        secret: process.env.SECRET_KEY,
+      }),
+      email: user.email,
     };
+  }
+  async validateToken(token: string) {
+    try {
+      return await this.jwtService.verifyAsync(token, {
+        secret: process.env.SECRET_KEY,
+      });
+    } catch (err) {
+      console.log('sdfsdfsdf', err);
+      throw new UnauthorizedException();
+    }
   }
 }

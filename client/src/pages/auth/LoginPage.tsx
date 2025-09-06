@@ -17,14 +17,16 @@ const LoginPage = () => {
   const { register, handleSubmit } =
     useForm<LoginFormData>();
   const loginHandler = async (data: LoginFormData) => {
-    console.log(data);
     try {
       const response = await loginUser(
         data.email,
         data.password,
       );
       console.log(response);
-      store.login(response.data.access_token);
+      store.login(
+        response.data.access_token,
+        response.data.email,
+      );
     } catch (error) {
       console.log(error);
     }

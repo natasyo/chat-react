@@ -7,6 +7,9 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { MessageDTO } from './dto/MessageDTO';
+import { UseGuards } from '@nestjs/common';
+import { WsJwtGuard } from '../auth/ws-jwt.guard';
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -21,9 +24,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('Client connected', client.id);
   }
 
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('message')
-  handleMessage(@MessageBody() message: string) {
-    console.log('Message', message);
-    this.server.emit('message', message);
+  handleMessage(@MessageBody() body: MessageDTO) {
+    console.log('Message', body);
+    this.server.emit('message', body);
   }
 }
