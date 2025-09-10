@@ -1,26 +1,17 @@
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
 import { useThemeStore } from '../store/ThemeStore.ts';
-import { useAuthStore } from '../store/AuthStore.tsx';
+import { useAuthStore } from '../store/AuthStore.ts';
 import { Button } from '../ui/Button.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 const Header = () => {
-  const { theme, toggleTheme } = useThemeStore();
+  const { toggleTheme } = useThemeStore();
   const store = useAuthStore();
-  useEffect(() => {
-    console.log(store);
-  }, [store]);
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
+
   return (
     <header
-      className={`bg-blue-200 dark:bg-blue-950 dark:text-white `}
+      className={`bg-light-panel dark:bg-dark-panel dark:text-white 
+      mb-4 me-6 p-3`}
     >
       <div className="flex justify-between container  mx-auto py-2 items-center">
         <Link to={'/'}>

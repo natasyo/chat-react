@@ -22,6 +22,15 @@ model User {
   messages  Message[]
 
   Chat Chat[]
+
+  RefreshTokens RefreshTokens[]
+}
+
+model RefreshTokens {
+  id     String @id @default(cuid(2))
+  token  String
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: NoAction)
 }
 
 model Message {

@@ -127,6 +127,12 @@ exports.Prisma.UserScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.RefreshTokensScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  userId: 'userId'
+};
+
 exports.Prisma.MessageScalarFieldEnum = {
   id: 'id',
   text: 'text',
@@ -152,6 +158,7 @@ exports.Prisma.QueryMode = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  RefreshTokens: 'RefreshTokens',
   Message: 'Message',
   Chat: 'Chat'
 };

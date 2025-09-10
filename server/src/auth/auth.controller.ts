@@ -1,8 +1,16 @@
-import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Post,
+  Req,
+  UseFilters,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { PrismaClientExceptionFilter } from '../common/filters/prisma-exception.filter';
 import { LoginDto } from './dto/login.dto';
+import { LogoutDto } from './dto/logout.dto';
 
 // @UseFilters(new PrismaClientExceptionFilter())
 @Controller('auth')
@@ -16,5 +24,10 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto) {
     return await this.auth.login(dto);
+  }
+
+  @Post('logout')
+  async logout(@Body() dto: LogoutDto) {
+    return await this.auth.logout(dto);
   }
 }

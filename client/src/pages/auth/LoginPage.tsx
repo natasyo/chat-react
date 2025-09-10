@@ -3,7 +3,8 @@ import { Button } from '../../ui/Button.tsx';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { loginUser } from '../../functions/api.ts';
-import { useAuthStore } from '../../store/AuthStore.tsx';
+import { useAuthStore } from '../../store/AuthStore.ts';
+import { Layout } from './Layout.tsx';
 
 const loginScheme = z.object({
   email: z.string().email('Email is required'),
@@ -22,9 +23,9 @@ const LoginPage = () => {
         data.email,
         data.password,
       );
-      console.log(response);
       store.login(
-        response.data.access_token,
+        response.data.accessToken,
+        response.data.refreshToken,
         response.data.email,
       );
     } catch (error) {
@@ -32,7 +33,7 @@ const LoginPage = () => {
     }
   };
   return (
-    <div>
+    <Layout>
       <h1>login</h1>
       <form onSubmit={handleSubmit(loginHandler)}>
         <Input
@@ -59,7 +60,7 @@ const LoginPage = () => {
           </a>
         </div>
       </form>
-    </div>
+    </Layout>
   );
 };
 

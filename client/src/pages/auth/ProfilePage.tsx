@@ -1,7 +1,9 @@
+import { Layout } from './Layout.tsx';
+
 export const ProfilePage = () => {
   return (
-    <div>
+    <Layout>
       <h1>Profile</h1>
-    </div>
+    </Layout>
   );
 };

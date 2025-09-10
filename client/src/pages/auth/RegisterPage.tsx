@@ -6,6 +6,7 @@ import { Button } from '../../ui/Button.tsx';
 import { registerUser } from '../../functions/api.ts';
 import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { Layout } from './Layout.tsx';
 
 const registerSchema = z
   .object({
@@ -86,7 +87,7 @@ const RegisterPage = () => {
   }
 
   return (
-    <div>
+    <Layout>
       <h1>Register</h1>
       <form
         onSubmit={handleSubmit(RegisterForm)}
@@ -118,7 +119,7 @@ const RegisterPage = () => {
           </a>
         </div>
       </form>
-    </div>
+    </Layout>
   );
 };
 

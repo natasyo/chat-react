@@ -21,3 +21,13 @@ export async function loginUser(
 ) {
   return await api.post('/auth/login', { email, password });
 }
+
+export async function logoutUser(
+  email: string,
+  refreshToken: string,
+) {
+  return await api.post('/auth/logout', {
+    email,
+    refreshToken,
+  });
+}
