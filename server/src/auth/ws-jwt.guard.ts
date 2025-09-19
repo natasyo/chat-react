@@ -1,11 +1,6 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Observable } from 'rxjs';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {
@@ -16,14 +11,17 @@ export class WsJwtGuard implements CanActivate {
       client.handshake?.auth?.token ||
       client.handshake?.headers?.authorization?.split(' ')[1];
     if (!token) {
-      throw new UnauthorizedException('Token not provided.');
+      throw new WsException('Token not provided.');
     }
+
     try {
       const payload = await this.authService.validateToken(token);
+      console.log('payload', payload);
       client.user = payload;
       return true;
-    } catch {
-      throw new UnauthorizedException('Invalid token');
+    } catch (e) {
+      console.log(e.message);
+      throw new WsException(e.message || 'invalid_token');
     }
   }
 }

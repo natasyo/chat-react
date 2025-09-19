@@ -13,10 +13,17 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+generator zod {
+  provider = "prisma-zod-generator"
+  output   = "../../shared/generated/zod" // укажи папку для генерации
+}
 model User {
   id        String      @id @default(cuid(2))
   email     String   @unique
   password  String
+  name String?
+  lastName String?
   createdAt DateTime @default(now())
   messages Message[]
 
@@ -27,6 +34,7 @@ model User {
 model RefreshTokens{
   id String @id @default(cuid(2))
   token String
+  createdAt DateTime @default(now())
   userId String
   user User @relation(fields: [userId], references: [id], onDelete: NoAction)
 }
