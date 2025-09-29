@@ -7,7 +7,6 @@ interface Props extends HTMLProps<HTMLInputElement> {
   error?: FieldError;
 }
 export const Input = (props: Props) => {
-  console.log(props.error?.message);
   return (
     <div>
       <input

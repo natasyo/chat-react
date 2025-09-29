@@ -12,6 +12,7 @@ type AuthState = {
     email: string,
   ) => void;
   logout: () => void;
+  updateToken: (jwt: string, refreshToken: string) => void;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -32,6 +33,8 @@ export const useAuthStore = create<AuthState>()(
           await logoutUser(email, refreshToken);
         set({ jwt: null, email: null, refreshToken: null });
       },
+      updateToken: (jwt: string, refreshToken: string) =>
+        set({ refreshToken: refreshToken, jwt }),
     }),
     { name: 'token' },
   ),

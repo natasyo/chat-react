@@ -20,7 +20,6 @@ const Header = () => {
         <div className={`flex items-center`}>
           {store.jwt ? (
             <div className={`fex items-center`}>
-              <Link to={'/profile'}>Profile</Link>
               <Button onClick={() => store.logout()}>
                 Logout
               </Button>

@@ -124,6 +124,8 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   password: 'password',
+  name: 'name',
+  lastName: 'lastName',
   createdAt: 'createdAt'
 };
 
@@ -137,6 +139,7 @@ exports.Prisma.ProfileScalarFieldEnum = {
 exports.Prisma.RefreshTokensScalarFieldEnum = {
   id: 'id',
   token: 'token',
+  createdAt: 'createdAt',
   userId: 'userId'
 };
 

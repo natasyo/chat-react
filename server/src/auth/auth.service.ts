@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -11,6 +11,7 @@ import { LoginDto } from './dto/login.dto';
 import * as process from 'node:process';
 import { LogoutDto } from './dto/logout.dto';
 import { randomUUID } from 'crypto';
+import { RefreshTokenDto } from './dto/refreshTokenDto';
 
 @Injectable()
 export class AuthService {
@@ -35,21 +36,20 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       jti: randomUUID(),
+      createdAt: Date.now(),
     };
 
     const accessToken = await this.jwtService.signAsync(payloadAccess, {
       secret: process.env.SECRET_KEY,
-      expiresIn: '15m',
+      expiresIn: '24h',
     });
     const payloadRefresh = {
       sub: user.id,
       email: user.email,
       jti: randomUUID(),
+      createdAt: Date.now(),
     };
-    const refreshToken = await this.jwtService.signAsync(payloadRefresh, {
-      secret: process.env.JWT_REFRESH_SECRET,
-      expiresIn: '1h',
-    });
+    const refreshToken = randomUUID().toString();
     const hashToken = await bcrypt.hash(refreshToken, 12);
     const result = await this.prisma.refreshTokens.create({
       data: {
@@ -73,17 +73,61 @@ export class AuthService {
       const tokens = await this.prisma.refreshTokens.findMany({
         where: { userId: user.id },
       });
-      if (!tokens) return null;
-      tokens.map(async (token) => {
-        if (await bcrypt.compare(logoutDto.refreshToken, token.token)) {
-          console.log('Ok-------------', logoutDto.refreshToken, token);
-          return this.prisma.refreshTokens.delete({
+
+      for (const token of tokens) {
+        console.log(token);
+        const isMatch = await bcrypt.compare(
+          logoutDto.refreshToken,
+          token.token,
+        );
+        console.log(isMatch);
+        if (isMatch) {
+          await this.prisma.refreshTokens.delete({
             where: { id: token.id },
           });
         }
-      });
+      }
     } catch (error) {
       console.log('logout', error);
+      throw new UnauthorizedException();
+    }
+  }
+  async refreshToken(refreshDto: RefreshTokenDto) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email: refreshDto.email },
+      });
+      if (!user) return null;
+      const tokens = await this.prisma.refreshTokens.findMany({
+        where: { userId: user.id },
+      });
+      for (const token of tokens) {
+        const isMatch = await bcrypt.compare(
+          refreshDto.refreshToken,
+          token.token,
+        );
+        console.log(isMatch);
+        if (isMatch) {
+          const newAccessToken = await this.jwtService.signAsync({
+            sub: user.id,
+            email: user.email,
+            jti: randomUUID(),
+            createdAt: Date.now(),
+          });
+          const newRefreshToken = randomUUID().toString();
+          await this.prisma.refreshTokens.update({
+            where: { id: token.id },
+            data: { token: newRefreshToken },
+          });
+          return {
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+            email: user.email,
+          };
+        }
+      }
+      return new UnauthorizedException();
+    } catch (error) {
       throw new UnauthorizedException();
     }
   }
@@ -94,8 +138,11 @@ export class AuthService {
         secret: process.env.SECRET_KEY,
       });
     } catch (err) {
-      console.log('sdfsdfsdf', err);
-      throw new UnauthorizedException();
+      if (err instanceof TokenExpiredError) {
+        console.log('asdkla;skdl;');
+        throw new UnauthorizedException('Access token expired');
+      }
+      throw new UnauthorizedException('Invalid token');
     }
   }
 }
