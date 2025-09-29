@@ -33,6 +33,15 @@ export async function logoutUser(
   });
 }
 
+export async function refreshToken(
+  email: string,
+  refreshToken: string,
+) {
+  return await api.post('/auth/refresh-token', {
+    email,
+    refreshToken,
+  });
+}
 export async function getUser(email: string) {
   return await api.get('/users?email=' + email);
 }
