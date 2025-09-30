@@ -3,14 +3,15 @@ import { Input } from '../../ui/Input.tsx';
 import { useAuthStore } from '../../store/AuthStore.ts';
 import { useEffect, useState } from 'react';
 import type { Profile, User } from '../../types/prisma.ts';
-import { getUser } from '../../functions/api.ts';
+import {
+  getUser,
+  updateProfile,
+} from '../../functions/api.ts';
 import { Button } from '../../ui/Button.tsx';
 
 export const ProfilePage = () => {
   const email = useAuthStore((state) => state.email);
-  const [user, setUser] = useState<Partial<User> | null>(
-    null,
-  );
+  const [user, setUser] = useState<User | null>(null);
   useEffect(() => {
     if (email) {
       (async () => {
@@ -28,7 +29,7 @@ export const ProfilePage = () => {
         placeholder={`Name`}
         onChange={(e) => {
           setUser((prev) => ({
-            ...(prev ?? {}),
+            ...prev!,
             profile: {
               ...((prev && prev.profile) ??
                 ({} as Profile)),
@@ -43,7 +44,7 @@ export const ProfilePage = () => {
         placeholder={`Surname`}
         onChange={(e) => {
           setUser((prev) => ({
-            ...(prev ?? {}),
+            ...prev!,
             profile: {
               ...((prev && prev.profile) ??
                 ({} as Profile)),
@@ -58,8 +59,8 @@ export const ProfilePage = () => {
         onClick={(e) => {
           e.preventDefault();
           (async () => {
-            // if (user && user.id)
-            //   await updateProfile(user.id, user);
+            if (user?.profile)
+              await updateProfile(user.id, user.profile);
           })();
 
           console.log(user);

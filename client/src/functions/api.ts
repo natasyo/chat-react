@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { User } from '../types/prisma.ts';
+import type { Profile } from '../types/prisma.ts';
 const api = axios.create({
   baseURL: 'http://localhost:3000',
 });
@@ -20,6 +20,7 @@ export async function loginUser(
   email: string,
   password: string,
 ) {
+  console.log(password);
   return await api.post('/auth/login', { email, password });
 }
 
@@ -27,6 +28,7 @@ export async function logoutUser(
   email: string,
   refreshToken: string,
 ) {
+  console.log('logout');
   return await api.post('/auth/logout', {
     email,
     refreshToken,
@@ -48,7 +50,7 @@ export async function getUser(email: string) {
 
 export async function updateProfile(
   id: string,
-  user: User,
+  user: Profile,
 ) {
-  return await api.put(`/profiles/${id}`, user);
+  return await api.put(`/users/${id}`, user);
 }

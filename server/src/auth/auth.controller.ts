@@ -21,6 +21,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const data = await this.auth.login(dto);
+
     res.cookie('refreshToken', data.refreshToken, {
       httpOnly: true,
       secure: false, // в проде только https
