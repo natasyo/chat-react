@@ -17,10 +17,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-generator zod {
-  provider = "prisma-zod-generator"
-  output   = "../../shared/generated/zod" // укажи папку для генерации
-}
 model User {
   id        String      @id @default(cuid(2))
   email     String   @unique
@@ -41,6 +37,7 @@ model Profile{
   id String @id @default(cuid(2))
   name String?
   surname String?
+  photo String?
   userId String @unique
   user User @relation(fields: [userId], references: [id])
 

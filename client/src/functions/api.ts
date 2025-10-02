@@ -51,6 +51,12 @@ export async function getUser(email: string) {
 export async function updateProfile(
   id: string,
   user: Profile,
+  file?: File,
 ) {
-  return await api.put(`/users/${id}`, user);
+  const formData = new FormData();
+  if (file) {
+    formData.append('photo', file);
+  }
+  formData.append('user', JSON.stringify(user));
+  return await api.put(`/users/${id}`, formData);
 }

@@ -8,10 +8,12 @@ import {
   updateProfile,
 } from '../../functions/api.ts';
 import { Button } from '../../ui/Button.tsx';
+import { FileInput } from '../../ui/FileInput.tsx';
 
 export const ProfilePage = () => {
   const email = useAuthStore((state) => state.email);
   const [user, setUser] = useState<User | null>(null);
+  const [file, setFile] = useState<File>();
   useEffect(() => {
     if (email) {
       (async () => {
@@ -53,6 +55,28 @@ export const ProfilePage = () => {
           }));
         }}
       />
+      <FileInput
+        className={`mx-auto`}
+        onChange={(event) => {
+          const fileName = (
+            event.target as HTMLInputElement
+          ).files?.[0].name;
+          setFile(
+            (event.target as HTMLInputElement).files?.[0],
+          );
+          setUser((prev) => ({
+            ...prev!,
+            profile: {
+              ...((prev && prev.profile) ??
+                ({} as Profile)),
+              photo: fileName ?? '',
+            },
+          }));
+          console.log(
+            (event.target as HTMLInputElement).value,
+          );
+        }}
+      />
       <Button
         className={`mx-auto px-6 py-2`}
         variant={'primary'}
@@ -60,7 +84,11 @@ export const ProfilePage = () => {
           e.preventDefault();
           (async () => {
             if (user?.profile)
-              await updateProfile(user.id, user.profile);
+              await updateProfile(
+                user.id,
+                user.profile,
+                file,
+              );
           })();
 
           console.log(user);
