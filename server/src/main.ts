@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { PrismaClientExceptionFilter } from './common/filters/prisma-exception.filter';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
+import express from 'express';
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,6 +31,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new PrismaClientExceptionFilter());
+  app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
