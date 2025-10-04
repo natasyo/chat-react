@@ -55,12 +55,8 @@ export const ProfilePage = () => {
           }));
         }}
       />
-      <img
-        src={`http://localhost:3000/uploads/${user?.profile?.photo}`}
-        className={`w-20`}
-        alt={`${user?.profile?.name} profile`}
-      />
       <FileInput
+        image={`${user?.profile?.photo ?? undefined}`}
         className={`mx-auto`}
         onChange={(event) => {
           const fileName = (

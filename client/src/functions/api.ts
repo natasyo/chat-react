@@ -45,7 +45,7 @@ export async function refreshToken(
   });
 }
 export async function getUser(email: string) {
-  return await api.get('/users?email=' + email);
+  return await api.get('/users/by-email?email=' + email);
 }
 
 export async function getUsers() {
