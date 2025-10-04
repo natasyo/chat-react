@@ -48,6 +48,10 @@ export async function getUser(email: string) {
   return await api.get('/users?email=' + email);
 }
 
+export async function getUsers() {
+  return await api.get('/users');
+}
+
 export async function updateProfile(
   id: string,
   user: Profile,

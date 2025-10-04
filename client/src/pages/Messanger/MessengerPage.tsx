@@ -62,39 +62,39 @@ const MessengerPage = () => {
 
   useEffect(() => {
     connectSocket(authStore.jwt);
-    // const newSocket = io('http://localhost:3000', {
-    //   auth: {
-    //     token: authStore.jwt,
-    //   },
-    //   transports: ['websocket'],
-    // });
-    // setSocket(newSocket);
-    // newSocket.on('exception', async (err) => {
-    //   if (
-    //     err.message === 'Access token expired' &&
-    //     authStore.email &&
-    //     authStore.refreshToken
-    //   ) {
-    //     const response = await refreshToken(
-    //       authStore.email,
-    //       authStore.refreshToken,
-    //     );
-    //     authStore.updateToken(
-    //       response.data.accessToken,
-    //       response.data.refreshToken,
-    //     );
-    //     newSocket.disconnect();
-    //   }
-    // });
-    // newSocket.on(
-    //   'message',
-    //   (msg: { email: string; text: string }) => {
-    //     setMessages((pev) => [...pev, msg]);
-    //   },
-    // );
-    // return () => {
-    //   newSocket.disconnect();
-    // };
+    const newSocket = io('http://localhost:3000', {
+      auth: {
+        token: authStore.jwt,
+      },
+      transports: ['websocket'],
+    });
+    setSocket(newSocket);
+    newSocket.on('exception', async (err) => {
+      if (
+        err.message === 'Access token expired' &&
+        authStore.email &&
+        authStore.refreshToken
+      ) {
+        const response = await refreshToken(
+          authStore.email,
+          authStore.refreshToken,
+        );
+        authStore.updateToken(
+          response.data.accessToken,
+          response.data.refreshToken,
+        );
+        newSocket.disconnect();
+      }
+    });
+    newSocket.on(
+      'message',
+      (msg: { email: string; text: string }) => {
+        setMessages((pev) => [...pev, msg]);
+      },
+    );
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
   const sendMessage = (input: string) => {
     if (socket && input.trim()) {
