@@ -7,25 +7,56 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { MessageDTO } from './dto/MessageDTO';
+import type { MessagePrivateDTO, MessageDTO } from './dto';
 import { UseFilters, UseGuards } from '@nestjs/common';
 import { WsJwtGuard } from '../auth/ws-jwt.guard';
 import { SocketExceptionFilter } from './socket-exception.filter';
+import jwt from 'jsonwebtoken';
+import * as process from 'node:process';
+
+class JwtPayload {}
 
 @WebSocketGateway({
   cors: { origin: 'http://localhost:5173', credentials: true },
 })
 @UseFilters(SocketExceptionFilter)
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  private clients = new Map<string, string>();
   @WebSocketServer()
   server: Server;
 
   handleDisconnect(client: Socket) {
+    for (const [email, id] of this.clients.entries()) {
+      if (id === client.id) {
+        this.clients.delete(email);
+        console.log(`❌ User ${email} disconnected`);
+      }
+    }
     console.log('Client disconnected', client.id);
   }
 
   handleConnection(client: Socket) {
-    console.log('Client connected', client.id);
+    try {
+      const token =
+        client.handshake.auth?.token || client.handshake.query?.token;
+      if (!token) {
+        console.warn('no token provided');
+        client.disconnect();
+        return;
+      }
+      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+      const email = decoded['email'];
+      if (!email) {
+        console.warn('no token provided');
+        client.disconnect();
+        return;
+      }
+      this.clients.set(email, client.id);
+      console.log('Client connected', client.id, email);
+    } catch (err) {
+      console.error('❌ Invalid token:', err.message);
+      client.disconnect();
+    }
   }
 
   @UseGuards(WsJwtGuard)
@@ -33,5 +64,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleMessage(@MessageBody() body: MessageDTO) {
     console.log('Message', body);
     this.server.emit('message', body);
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('private_message')
+  handlePrivateMessage(@MessageBody() body: MessagePrivateDTO) {
+    const recipientSocketEmail = this.clients.get(body.recipientEmail);
+    if (recipientSocketEmail) {
+      this.server.to(recipientSocketEmail).emit('private_message', {
+        from: body.senderEmail,
+        text: body.text,
+      });
+    } else {
+      console.log(`⚠️ User ${body.recipientEmail} is offline`);
+    }
   }
 }

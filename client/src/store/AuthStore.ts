@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { logoutUser } from '../functions/api.ts';
 
-type AuthState = {
+export type AuthState = {
   jwt: string | null;
   refreshToken: string | null;
   email: string | null;
