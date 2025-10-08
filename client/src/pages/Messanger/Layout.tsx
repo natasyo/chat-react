@@ -14,7 +14,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Sidebar />
       <div className="flex flex-col w-full bg-light-panel dark:bg-dark-panel rounded-2xl">
         <MessengerHeader />
-        <div className="grow ">{children}</div>
+        <>{children}</>
       </div>
     </div>
   );

@@ -10,7 +10,12 @@ interface Props
     ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
   > {
-  variant?: 'success' | 'danger' | 'primary' | 'outline';
+  variant?:
+    | 'success'
+    | 'danger'
+    | 'primary'
+    | 'outline'
+    | 'secondary';
 }
 export const Button = (props: Props) => {
   return (

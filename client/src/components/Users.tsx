@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { User } from '../types/prisma.ts';
 import { getUsers } from '../functions/api.ts';
+import { useChatStore } from '../store/ChatsStore.ts';
 
 export const Users = () => {
   const [users, setUsers] = useState<User[]>();
@@ -10,11 +11,14 @@ export const Users = () => {
       setUsers(usersData.data as User[]);
     })();
   }, []);
-
+  const chatStore = useChatStore();
   return (
     <div>
       {users?.map((user) => (
         <p
+          onClick={() => {
+            chatStore.addUser(user);
+          }}
           key={user.id}
           className={`flex items-center py-2 px-1 hover:bg-light-panel-stroke hover:dark:text-dark-panel-stroke`}
         >

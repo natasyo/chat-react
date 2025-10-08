@@ -2,11 +2,15 @@ import { useAuthStore } from '../../store/AuthStore.ts';
 
 type Props = {
   messages: { email: string; text: string }[];
+  className?: string;
 };
-export const MessageItems = ({ messages }: Props) => {
+export const MessageItems = ({
+  messages,
+  className,
+}: Props) => {
   const userEmail = useAuthStore((state) => state.email);
   return (
-    <div>
+    <div className={`${className ?? ''} `}>
       {messages.map((msg, i) => (
         <div
           key={i}
