@@ -9,23 +9,29 @@ export const MessageItems = ({
   className,
 }: Props) => {
   const userEmail = useAuthStore((state) => state.email);
+  console.log(userEmail, messages);
   return (
     <div className={`${className ?? ''} `}>
-      {messages.map((msg, i) => (
-        <div
-          key={i}
-          className={` ${msg.email === userEmail ? 'text-right' : ''}`}
-        >
+      {messages.map((msg, i) => {
+        console.log(msg);
+        return (
           <div
-            className={` p-2 my-2 border max-w-full inline-block rounded-2xl`}
+            key={i}
+            className={` ${msg.email === userEmail ? 'text-right' : ''}`}
           >
-            <p className={`text-sm text-gray-400 italic `}>
-              {msg.email}
-            </p>
-            <p>{msg.text}</p>
+            <div
+              className={` p-2 my-2 border max-w-full inline-block rounded-2xl`}
+            >
+              <p
+                className={`text-sm text-gray-400 italic `}
+              >
+                {msg.email}
+              </p>
+              <p>{msg.text}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };

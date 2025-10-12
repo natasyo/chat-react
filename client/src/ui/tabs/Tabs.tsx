@@ -1,10 +1,6 @@
 // @flow
 
-import {
-  type ReactElement,
-  useEffect,
-  useState,
-} from 'react';
+import { type ReactElement, useState } from 'react';
 import type { TabProps } from './Tab.tsx';
 import { Button } from '../Button.tsx';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -14,12 +10,13 @@ interface TabsProps {
   defaultValue?: string;
   children: ReactElement<TabProps>[];
   onRemoveTab?: (value: string) => void;
-  onCreateTab?: () => void;
+  onSetActiveTab?: (value: string) => void;
 }
 export const Tabs = ({
   defaultValue,
   children,
   onRemoveTab,
+  onSetActiveTab,
 }: TabsProps) => {
   const [active, setActive] = useState<string>(
     defaultValue ?? children[0].props.value,
@@ -35,7 +32,12 @@ export const Tabs = ({
           >
             <Button
               className={`mx-1  px-5`}
-              onClick={() => setActive(child.props.value)}
+              onClick={() => {
+                if (onSetActiveTab) {
+                  onSetActiveTab(child.props.value);
+                }
+                setActive(child.props.value);
+              }}
             >
               {child.props.label}
             </Button>

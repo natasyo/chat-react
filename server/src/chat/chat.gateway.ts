@@ -13,6 +13,7 @@ import { WsJwtGuard } from '../auth/ws-jwt.guard';
 import { SocketExceptionFilter } from './socket-exception.filter';
 import jwt from 'jsonwebtoken';
 import * as process from 'node:process';
+import { ChatService } from './chat.service';
 
 class JwtPayload {}
 
@@ -24,7 +25,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private clients = new Map<string, string>();
   @WebSocketServer()
   server: Server;
-
+  constructor(private readonly chatService: ChatService) {}
   handleDisconnect(client: Socket) {
     for (const [email, id] of this.clients.entries()) {
       if (id === client.id) {
@@ -68,15 +69,34 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage('private_message')
-  handlePrivateMessage(@MessageBody() body: MessagePrivateDTO) {
+  async handlePrivateMessage(@MessageBody() body: MessagePrivateDTO) {
     const recipientSocketEmail = this.clients.get(body.recipientEmail);
-    if (recipientSocketEmail) {
-      this.server.to(recipientSocketEmail).emit('private_message', {
-        from: body.senderEmail,
-        text: body.text,
-      });
+    const senderSocketEmail = this.clients.get(body.senderEmail);
+    const message = await this.chatService.savePrivateMessage(body);
+    if (recipientSocketEmail && senderSocketEmail) {
+      this.server.to(recipientSocketEmail).emit('private_message', message);
+      this.server.to(senderSocketEmail).emit('private_message', message);
     } else {
       console.log(`⚠️ User ${body.recipientEmail} is offline`);
+    }
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('get_private_message')
+  async getPrivateMessages(
+    @MessageBody() body: { userA: string; userB: string },
+  ) {
+    const data = await this.chatService.getPrivateMessages(
+      body.userA,
+      body.userB,
+    );
+    if (data) {
+      const userA = this.clients.get(body.userA);
+      const userB = this.clients.get(body.userB);
+      if (userA && userB) {
+        this.server.to(userA).emit('get_private_message', data);
+        this.server.to(userB).emit('get_private_message', data);
+      }
     }
   }
 }
