@@ -20,6 +20,11 @@ const MessengerPage = () => {
     useState<User>();
 
   function getPrivateMessages() {
+    console.log(
+      authStore.email,
+      ' ',
+      activeRecipient?.email,
+    );
     if (socket && activeRecipient) {
       socket.emit('get_private_message', {
         userA: authStore.email,
@@ -79,18 +84,16 @@ const MessengerPage = () => {
                 value={user.email}
                 label={user.email}
               >
-                <div className="flex flex-col h-full max-h-full ">
-                  <MessageItems
-                    messages={privateMessages.map(
-                      (msg) => ({
-                        text: msg.text,
-                        email: msg.senderEmail,
-                      }),
-                    )}
-                    className={`flex-1 overflow-y-auto px-2`}
-                  />
-                  <InputText sendMessage={sendMessage} />
-                </div>
+                {/*<div className="flex flex-col h-full max-h-full ">*/}
+                <MessageItems
+                  messages={privateMessages.map((msg) => ({
+                    text: msg.text,
+                    email: msg.senderEmail,
+                  }))}
+                  className={`flex-1 overflow-y-auto px-2 min-h-0`}
+                />
+                <InputText sendMessage={sendMessage} />
+                {/*</div>*/}
               </Tab>
             ))}
           </Tabs>

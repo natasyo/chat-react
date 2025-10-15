@@ -9,7 +9,6 @@ export const MessageItems = ({
   className,
 }: Props) => {
   const userEmail = useAuthStore((state) => state.email);
-  console.log(userEmail, messages);
   return (
     <div className={`${className ?? ''} `}>
       {messages.map((msg, i) => {

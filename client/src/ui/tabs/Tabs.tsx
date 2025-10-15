@@ -23,8 +23,8 @@ export const Tabs = ({
   );
 
   return (
-    <div className={`flex-1 flex flex-col`}>
-      <div className={`flex`}>
+    <div className={`flex-1 flex flex-col min-h-0`}>
+      <div className={`flex my-3`}>
         {children.map((child: ReactElement<TabProps>) => (
           <div
             key={child.props.value}
@@ -56,7 +56,7 @@ export const Tabs = ({
           </div>
         ))}
       </div>
-      <div className={`flex-1`}>
+      <div className={`flex-1 min-h-0 flex flex-col`}>
         {
           children.find(
             (child) => child.props.value === active,
