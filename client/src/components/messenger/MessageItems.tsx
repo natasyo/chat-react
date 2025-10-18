@@ -1,35 +1,66 @@
 import { useAuthStore } from '../../store/AuthStore.ts';
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 
 type Props = {
   messages: { email: string; text: string }[];
   className?: string;
 };
-export const MessageItems = ({
-  messages,
-  className,
-}: Props) => {
-  const userEmail = useAuthStore((state) => state.email);
-  return (
-    <div className={`${className ?? ''} `}>
-      {messages.map((msg, i) => {
-        return (
-          <div
-            key={i}
-            className={` ${msg.email === userEmail ? 'text-right' : ''}`}
-          >
+export const MessageItems = forwardRef(
+  ({ messages, className }: Props, ref) => {
+    const userEmail = useAuthStore((state) => state.email);
+
+    const containerRef = useRef<HTMLDivElement | null>(
+      null,
+    );
+
+    useImperativeHandle(ref, () => ({
+      scrollToBottom: (smooth = false) => {
+        if (containerRef.current) {
+          containerRef.current.scrollTo({
+            top: containerRef.current.scrollHeight,
+            behavior: smooth ? 'smooth' : 'auto',
+          });
+        }
+      },
+    }));
+    useEffect(() => {
+      if (containerRef.current) {
+        containerRef.current.scrollTop =
+          containerRef.current.scrollHeight;
+      }
+    }, [messages]);
+    return (
+      <div
+        className={`${className ?? ''} `}
+        ref={containerRef}
+      >
+        {messages.map((msg, i) => {
+          console.log(msg);
+          return (
             <div
-              className={` p-2 my-2 border max-w-full inline-block rounded-2xl`}
+              key={i}
+              className={` ${msg.email === userEmail ? 'text-right' : ''}`}
             >
-              <p
-                className={`text-sm text-gray-400 italic `}
+              <div
+                className={` p-2 my-2 border max-w-full inline-block rounded-2xl`}
               >
-                {msg.email}
-              </p>
-              <p>{msg.text}</p>
+                <p
+                  className={`text-sm text-gray-400 italic `}
+                >
+                  {msg.email}
+                </p>
+                <p>{msg.text}</p>
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+          );
+        })}
+      </div>
+    );
+  },
+);
+MessageItems.displayName = 'MessageItems';
