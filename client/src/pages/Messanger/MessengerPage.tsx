@@ -27,14 +27,15 @@ const MessengerPage = () => {
     );
     if (socket && activeRecipient) {
       socket.emit('get_private_message', {
-        userA: authStore.email,
-        userB: activeRecipient.email,
+        sender: authStore.email,
+        recipient: activeRecipient.email,
       });
     }
   }
 
   useEffect(() => {
     getPrivateMessages();
+    console.log(activeRecipient);
   }, [activeRecipient]);
 
   const sendMessage = (input: string) => {
@@ -84,7 +85,6 @@ const MessengerPage = () => {
                 value={user.email}
                 label={user.email}
               >
-                {/*<div className="flex flex-col h-full max-h-full ">*/}
                 <MessageItems
                   messages={privateMessages.map((msg) => ({
                     text: msg.text,
@@ -93,7 +93,6 @@ const MessengerPage = () => {
                   className={`flex-1 overflow-y-auto px-2 min-h-0`}
                 />
                 <InputText sendMessage={sendMessage} />
-                {/*</div>*/}
               </Tab>
             ))}
           </Tabs>

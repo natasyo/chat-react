@@ -84,18 +84,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(WsJwtGuard)
   @SubscribeMessage('get_private_message')
   async getPrivateMessages(
-    @MessageBody() body: { userA: string; userB: string },
+    @MessageBody() body: { sender: string; recipient: string },
   ) {
     const data = await this.chatService.getPrivateMessages(
-      body.userA,
-      body.userB,
+      body.sender,
+      body.recipient,
     );
+    console.log('------------------------------------', data.length);
     if (data) {
-      const userA = this.clients.get(body.userA);
-      const userB = this.clients.get(body.userB);
-      if (userA && userB) {
-        this.server.to(userA).emit('get_private_message', data);
-        this.server.to(userB).emit('get_private_message', data);
+      const sender = this.clients.get(body.sender);
+      if (sender) {
+        this.server.to(sender).emit('get_private_message', data);
       }
     }
   }

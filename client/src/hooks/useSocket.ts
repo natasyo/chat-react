@@ -17,6 +17,7 @@ export function useSocket(authStore: AuthState) {
     Message[]
   >([]);
   useEffect(() => {
+    console.log(authStore);
     if (!authStore) return;
     const newSocket = connectSocket(authStore);
     setSocket(newSocket);
@@ -31,6 +32,7 @@ export function useSocket(authStore: AuthState) {
       setPrivateMessages((prev) => [...prev, data]);
     });
     newSocket?.on('get_private_message', (data) => {
+      console.log(data);
       setPrivateMessages(data ?? '');
     });
 

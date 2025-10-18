@@ -12,7 +12,6 @@ export const MessageItems = ({
   return (
     <div className={`${className ?? ''} `}>
       {messages.map((msg, i) => {
-        console.log(msg);
         return (
           <div
             key={i}
