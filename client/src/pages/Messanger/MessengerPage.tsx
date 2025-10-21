@@ -17,8 +17,8 @@ const MessengerPage = () => {
 
   const { socket, privateMessages } = useSocket(authStore);
   const [activeRecipient, setActiveRecipient] =
-    useState<User>();
-
+    useState<User | null>(null);
+  const chatStore = useChatStore();
   function getPrivateMessages() {
     console.log(
       authStore.email,
@@ -31,11 +31,17 @@ const MessengerPage = () => {
         recipient: activeRecipient.email,
       });
     }
+
+    if (socket && activeRecipient) {
+      socket.emit('is_online', {
+        users: chatStore.users.map((user) => user.user),
+        sender: activeRecipient,
+      });
+    }
   }
 
   useEffect(() => {
     getPrivateMessages();
-    console.log(activeRecipient);
   }, [activeRecipient]);
 
   const sendMessage = (input: string) => {
@@ -55,10 +61,11 @@ const MessengerPage = () => {
       });
     }
   };
-  const chatStore = useChatStore();
+
   useEffect(() => {
     console.log(chatStore.users);
-    setActiveRecipient(chatStore.users[0]);
+    if (chatStore.users.length > 0)
+      setActiveRecipient(chatStore.users[0].user);
   }, [chatStore.users]);
   return (
     <Layout>
@@ -67,34 +74,39 @@ const MessengerPage = () => {
           <Tabs
             onRemoveTab={(value) => {
               const user = chatStore.users.find(
-                (user) => user.email === value,
+                (user) => user.user.email === value,
               );
-              if (user) chatStore.removeUser(user);
+              if (user) chatStore.removeUser(user.user);
               console.log(user);
             }}
             onSetActiveTab={(value) => {
               const user = chatStore.users.find(
-                (user) => user.email === value,
+                (user) => user.user.email === value,
               );
-              if (user) setActiveRecipient(user);
+              if (user) setActiveRecipient(user.user);
             }}
           >
-            {chatStore.users.map((user) => (
-              <Tab
-                key={user.id}
-                value={user.email}
-                label={user.email}
-              >
-                <MessageItems
-                  messages={privateMessages.map((msg) => ({
-                    text: msg.text,
-                    email: msg.senderEmail,
-                  }))}
-                  className={`flex-1 overflow-y-auto px-2 min-h-0`}
-                />
-                <InputText sendMessage={sendMessage} />
-              </Tab>
-            ))}
+            {chatStore.users.map((user) => {
+              console.log(user);
+              return (
+                <Tab
+                  key={user.user.id}
+                  value={user.user.email}
+                  label={user.user.email}
+                >
+                  <MessageItems
+                    messages={privateMessages.map(
+                      (msg) => ({
+                        text: msg.text,
+                        email: msg.senderEmail,
+                      }),
+                    )}
+                    className={`flex-1 overflow-y-auto px-2 min-h-0`}
+                  />
+                  <InputText sendMessage={sendMessage} />
+                </Tab>
+              );
+            })}
           </Tabs>
         )}
       </>

@@ -14,6 +14,7 @@ import { SocketExceptionFilter } from './socket-exception.filter';
 import jwt from 'jsonwebtoken';
 import * as process from 'node:process';
 import { ChatService } from './chat.service';
+import { User } from '@prisma/client';
 
 class JwtPayload {}
 
@@ -73,8 +74,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const recipientSocketEmail = this.clients.get(body.recipientEmail);
     const senderSocketEmail = this.clients.get(body.senderEmail);
     const message = await this.chatService.savePrivateMessage(body);
-    if (recipientSocketEmail && senderSocketEmail) {
+    if (recipientSocketEmail) {
       this.server.to(recipientSocketEmail).emit('private_message', message);
+    }
+    if (senderSocketEmail) {
       this.server.to(senderSocketEmail).emit('private_message', message);
     } else {
       console.log(`⚠️ User ${body.recipientEmail} is offline`);
@@ -97,5 +100,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.to(sender).emit('get_private_message', data);
       }
     }
+  }
+
+  @SubscribeMessage('is_online')
+  async getIsOnline(@MessageBody() body: { sender: User; users: User[] }) {
+    if (body.users && body.users.length > 0 && body.sender) {
+      const isOnlineUsers: { user: User; isOnline: boolean }[] = [];
+      body.users.forEach((user: User) => {
+        const recipient = this.clients.get(user.email);
+        isOnlineUsers.push({ isOnline: !!recipient, user });
+      });
+      const sender = this.clients.get(body.sender.email);
+      if (sender) {
+        return this.server.to(sender).emit('is_online', isOnlineUsers);
+      }
+    }
+    // const recipientUser = this.clients.get(body.recipient);
   }
 }

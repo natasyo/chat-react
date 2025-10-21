@@ -36,6 +36,10 @@ export function useSocket(authStore: AuthState) {
       setPrivateMessages(data ?? '');
     });
 
+    newSocket?.on('is_online', (data) => {
+      console.log(data);
+    });
+
     return () => {
       newSocket?.disconnect();
     };

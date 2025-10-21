@@ -40,7 +40,6 @@ export const MessageItems = forwardRef(
         ref={containerRef}
       >
         {messages.map((msg, i) => {
-          console.log(msg);
           return (
             <div
               key={i}
