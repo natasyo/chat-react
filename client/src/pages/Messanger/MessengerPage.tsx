@@ -31,18 +31,31 @@ const MessengerPage = () => {
         recipient: activeRecipient.email,
       });
     }
-
-    if (socket && activeRecipient) {
-      socket.emit('is_online', {
-        users: chatStore.users.map((user) => user.user),
-        sender: activeRecipient,
-      });
-    }
   }
 
   useEffect(() => {
     getPrivateMessages();
   }, [activeRecipient]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const sendIsOnline = () => {
+      const users = chatStore.users.map(
+        (user) => user.user,
+      );
+      console.log('is online');
+      socket.emit('is_online', {
+        users: users,
+        sender: authStore.email,
+      });
+    };
+    sendIsOnline();
+    const interval = setInterval(sendIsOnline, 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [socket]);
 
   const sendMessage = (input: string) => {
     if (socket && input.trim()) {
@@ -63,7 +76,6 @@ const MessengerPage = () => {
   };
 
   useEffect(() => {
-    console.log(chatStore.users);
     if (chatStore.users.length > 0)
       setActiveRecipient(chatStore.users[0].user);
   }, [chatStore.users]);
@@ -77,7 +89,6 @@ const MessengerPage = () => {
                 (user) => user.user.email === value,
               );
               if (user) chatStore.removeUser(user.user);
-              console.log(user);
             }}
             onSetActiveTab={(value) => {
               const user = chatStore.users.find(
@@ -87,12 +98,12 @@ const MessengerPage = () => {
             }}
           >
             {chatStore.users.map((user) => {
-              console.log(user);
               return (
                 <Tab
                   key={user.user.id}
                   value={user.user.email}
                   label={user.user.email}
+                  isOnline={user.isOnline}
                 >
                   <MessageItems
                     messages={privateMessages.map(

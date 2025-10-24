@@ -4,8 +4,10 @@ import { connectSocket } from '../functions/socket.ts';
 import type { Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from 'socket.io';
 import type { Message } from '../types/prisma.ts';
+import { useChatStore } from '../store/ChatsStore.ts';
 
 export function useSocket(authStore: AuthState) {
+  const chats = useChatStore();
   const [socket, setSocket] = useState<Socket<
     DefaultEventsMap,
     DefaultEventsMap
@@ -32,12 +34,11 @@ export function useSocket(authStore: AuthState) {
       setPrivateMessages((prev) => [...prev, data]);
     });
     newSocket?.on('get_private_message', (data) => {
-      console.log(data);
       setPrivateMessages(data ?? '');
     });
 
     newSocket?.on('is_online', (data) => {
-      console.log(data);
+      chats.changeOnline(data);
     });
 
     return () => {

@@ -64,7 +64,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @UseGuards(WsJwtGuard)
   @SubscribeMessage('message')
   handleMessage(@MessageBody() body: MessageDTO) {
-    console.log('Message', body);
     this.server.emit('message', body);
   }
 
@@ -93,7 +92,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       body.sender,
       body.recipient,
     );
-    console.log('------------------------------------', data.length);
     if (data) {
       const sender = this.clients.get(body.sender);
       if (sender) {
@@ -101,20 +99,27 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }
   }
-
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('is_online')
-  async getIsOnline(@MessageBody() body: { sender: User; users: User[] }) {
+  async getIsOnline(
+    @MessageBody() body: { sender: string | User; users: User[] },
+  ) {
+    const senderEmail =
+      typeof body.sender === 'object' && body.sender.email
+        ? body.sender.email
+        : (body.sender as string);
+    console.log('---------is online------------', body.sender);
     if (body.users && body.users.length > 0 && body.sender) {
       const isOnlineUsers: { user: User; isOnline: boolean }[] = [];
       body.users.forEach((user: User) => {
         const recipient = this.clients.get(user.email);
         isOnlineUsers.push({ isOnline: !!recipient, user });
       });
-      const sender = this.clients.get(body.sender.email);
+      const sender = this.clients.get(senderEmail);
+      console.log('---------is online------------', sender);
       if (sender) {
-        return this.server.to(sender).emit('is_online', isOnlineUsers);
+        this.server.to(sender).emit('is_online', isOnlineUsers);
       }
     }
-    // const recipientUser = this.clients.get(body.recipient);
   }
 }

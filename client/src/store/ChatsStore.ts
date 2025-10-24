@@ -30,9 +30,11 @@ export const useChatStore = create<ChatState>()(
             ),
           }));
         },
-        changeOnline: ({ user, isOnline }) => {
-          set((state) => ({
-            users: [...state.users, { user, isOnline }],
+        changeOnline: (
+          users: { user: User; isOnline: boolean }[],
+        ) => {
+          set(() => ({
+            users,
           }));
         },
       };

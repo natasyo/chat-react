@@ -30,8 +30,13 @@ export const Tabs = ({
             key={child.props.value}
             className={`pe-3 rounded-lg  mt-2 mx-0.5 relative ${child.props.value === active ? 'bg-linear-[135deg] from-dark-accent-grad-start to-dark-accent-grad-end text-white' : 'border border-light-panel-stroke dark:border-dark-panel-stroke'}`}
           >
+            {child.props.isOnline && (
+              <span
+                className={`absolute block h-2 w-2 bg-green-600 rounded-full top-2 z-10 right-6`}
+              ></span>
+            )}
             <Button
-              className={`mx-1  px-5`}
+              className={`mx-1  px-5 relative`}
               onClick={() => {
                 if (onSetActiveTab) {
                   onSetActiveTab(child.props.value);
@@ -39,7 +44,9 @@ export const Tabs = ({
                 setActive(child.props.value);
               }}
             >
-              {child.props.label}
+              <span>
+                {child.props.label} {child.props.isOnline}
+              </span>
             </Button>
             <button
               className={`absolute right-0 top-0`}

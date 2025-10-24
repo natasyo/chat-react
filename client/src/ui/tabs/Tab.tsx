@@ -6,6 +6,7 @@ export interface TabProps {
   label: string;
   value: string;
   className?: string;
+  isOnline?: boolean;
 }
 
 export function Tab({ children, className }: TabProps) {
