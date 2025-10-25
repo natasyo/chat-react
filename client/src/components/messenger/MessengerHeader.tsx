@@ -24,7 +24,7 @@ const MessengerHeader = () => {
   }, [authStore.email]);
   return (
     <div
-      className={`relative flex justify-between pt-3 pb-5 px-6 border border-light-panel-stroke/40 dark:border-dark-panel-stroke/40 border-opacity-40 rounded-2xl`}
+      className={`relative z-20 flex justify-between pt-3 pb-5 px-6 border border-light-panel-stroke/40 dark:border-dark-panel-stroke/40 border-opacity-40 rounded-2xl`}
     >
       <div className="flex items-center">
         <img

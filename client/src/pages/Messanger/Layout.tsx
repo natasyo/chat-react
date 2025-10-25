@@ -12,7 +12,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       className={`flex h-screen max-h-screen overflow-auto p-6  justify-between bg-light-bg dark:bg-dark-bg dark:text-white`}
     >
       <Sidebar />
-      <div className="flex flex-col w-full bg-light-panel dark:bg-dark-panel rounded-2xl">
+      <div className="flex flex-1 overflow-hidden flex-col w-full bg-light-panel dark:bg-dark-panel rounded-2xl">
         <MessengerHeader />
         <>{children}</>
       </div>

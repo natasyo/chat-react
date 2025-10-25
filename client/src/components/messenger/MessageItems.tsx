@@ -33,7 +33,7 @@ export const MessageItems = forwardRef(
         containerRef.current.scrollTop =
           containerRef.current.scrollHeight;
       }
-    }, [messages]);
+    }, [messages.length]);
     return (
       <div
         className={`${className ?? ''} `}
@@ -46,10 +46,10 @@ export const MessageItems = forwardRef(
               className={` ${msg.email === userEmail ? 'text-right' : ''}`}
             >
               <div
-                className={` p-2 my-2 border max-w-full inline-block rounded-2xl`}
+                className={` p-2 my-2 border max-w-full inline-block rounded-2xl overflow-hidden`}
               >
                 <p
-                  className={`text-sm text-gray-400 italic `}
+                  className={`text-sm text-gray-400 italic break-words`}
                 >
                   {msg.email}
                 </p>
