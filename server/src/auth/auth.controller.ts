@@ -32,15 +32,20 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@Body() dto: LogoutDto, @Req() req: Request) {
-    console.log("req.cookies['refreshToken']", req.cookies['refreshToken']);
-    return await this.auth.logout(dto);
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @Body() dto: LogoutDto,
+  ) {
+    // console.log("req.cookies['refreshToken']", req.cookies['refreshToken']);
+    const isRemoveToken = await this.auth.logout(dto);
+    if (!isRemoveToken) return { success: false };
+    res.clearCookie('refreshToken', { path: '/auth/refresh-token' });
   }
 
   @Post('refresh-token')
-  async refreshToken(@Body() dto: RefreshTokenDto, @Req() req: Request) {
+  async refreshToken(@Req() req: Request) {
     const oldToken = req.cookies.refreshToken;
     console.log('old token', oldToken);
-    return await this.auth.refreshToken(dto);
+    return await this.auth.refreshToken(oldToken);
   }
 }

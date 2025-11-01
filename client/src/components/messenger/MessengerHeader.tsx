@@ -6,7 +6,6 @@ import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { useThemeStore } from '../../store/ThemeStore.ts';
 import { useAuthStore } from '../../store/AuthStore.ts';
 import type { User } from '../../types/prisma.ts';
-import { getUser } from '../../functions/api.ts';
 import { IMAGE_URL } from '../../../config.ts';
 
 const MessengerHeader = () => {
@@ -16,12 +15,11 @@ const MessengerHeader = () => {
   const [user, setUser] = useState<User>();
   useEffect(() => {
     (async () => {
-      if (authStore && authStore.email) {
-        const response = await getUser(authStore.email);
-        setUser(response.data);
+      if (authStore && authStore.user) {
+        setUser(authStore.user);
       }
     })();
-  }, [authStore.email]);
+  }, [authStore.user]);
   return (
     <div
       className={`relative z-20 flex justify-between pt-3 pb-5 px-6 border border-light-panel-stroke/40 dark:border-dark-panel-stroke/40 border-opacity-40 rounded-2xl`}
@@ -38,7 +36,9 @@ const MessengerHeader = () => {
           >
             {user?.profile?.name} {user?.profile?.surname}
           </p>
-          <p className={'text-sm'}>{authStore.email}</p>
+          <p className={'text-sm'}>
+            {authStore.user!.email}
+          </p>
         </div>
       </div>
 

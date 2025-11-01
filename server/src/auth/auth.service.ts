@@ -12,6 +12,7 @@ import * as process from 'node:process';
 import { LogoutDto } from './dto/logout.dto';
 import { randomUUID } from 'crypto';
 import { RefreshTokenDto } from './dto/refreshTokenDto';
+import { EXPIRES_TOKEN } from '../../config';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +42,7 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(payloadAccess, {
       secret: process.env.SECRET_KEY,
-      expiresIn: '24h',
+      expiresIn: EXPIRES_TOKEN,
     });
     const payloadRefresh = {
       sub: user.id,
@@ -50,17 +51,16 @@ export class AuthService {
       createdAt: Date.now(),
     };
     const refreshToken = randomUUID().toString();
-    const hashToken = await bcrypt.hash(refreshToken, 12);
     const result = await this.prisma.refreshTokens.create({
       data: {
         userId: user.id,
-        token: hashToken,
+        token: refreshToken,
       },
     });
     return {
       accessToken: accessToken,
       refreshToken: refreshToken,
-      email: user.email,
+      user,
     };
   }
 
@@ -70,23 +70,16 @@ export class AuthService {
         where: { email: logoutDto.email },
       });
       if (!user) return null;
-      const tokens = await this.prisma.refreshTokens.findMany({
-        where: { userId: user.id },
+      const token = await this.prisma.refreshTokens.findFirst({
+        where: { token: logoutDto.refreshToken },
       });
 
-      for (const token of tokens) {
-        console.log(token);
-        const isMatch = await bcrypt.compare(
-          logoutDto.refreshToken,
-          token.token,
-        );
-        console.log(isMatch);
-        if (isMatch) {
-          await this.prisma.refreshTokens.delete({
-            where: { id: token.id },
-          });
-        }
+      if (token) {
+        await this.prisma.refreshTokens.delete({
+          where: { id: token.id },
+        });
       }
+      return true;
     } catch (error) {
       console.log('logout', error);
       throw new UnauthorizedException();
@@ -106,7 +99,6 @@ export class AuthService {
           refreshDto.refreshToken,
           token.token,
         );
-        console.log(isMatch);
         if (isMatch) {
           const newAccessToken = await this.jwtService.signAsync({
             sub: user.id,

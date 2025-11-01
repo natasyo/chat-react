@@ -11,23 +11,19 @@ import { Tab } from '../../ui/tabs/Tab.tsx';
 import { useChatStore } from '../../store/ChatsStore.ts';
 import { useEffect, useState } from 'react';
 import type { User } from '../../types/prisma.ts';
+import { useAuth } from '../../hooks/useAuth.ts';
 
 const MessengerPage = () => {
   const authStore: AuthState = useAuthStore();
-
+  const token = useAuth(authStore.jwt);
   const { socket, privateMessages } = useSocket(authStore);
   const [activeRecipient, setActiveRecipient] =
     useState<User | null>(null);
   const chatStore = useChatStore();
   function getPrivateMessages() {
-    console.log(
-      authStore.email,
-      ' ',
-      activeRecipient?.email,
-    );
     if (socket && activeRecipient) {
       socket.emit('get_private_message', {
-        sender: authStore.email,
+        sender: authStore.user!.email,
         recipient: activeRecipient.email,
       });
     }
@@ -43,10 +39,9 @@ const MessengerPage = () => {
       const users = chatStore.users.map(
         (user) => user.user,
       );
-      console.log('is online');
       socket.emit('is_online', {
         users: users,
-        sender: authStore.email,
+        sender: authStore.user!.email,
       });
     };
     sendIsOnline();
@@ -59,9 +54,10 @@ const MessengerPage = () => {
 
   const sendMessage = (input: string) => {
     if (socket && input.trim()) {
-      if (activeRecipient) {
+      console.log(authStore.user);
+      if (activeRecipient && authStore.user?.email) {
         socket.emit('private_message', {
-          senderEmail: authStore.email,
+          senderEmail: authStore.user.email,
           recipientEmail: activeRecipient.email,
           text: input.trim(),
         });
@@ -70,7 +66,7 @@ const MessengerPage = () => {
       }
       socket.emit('message', {
         text: input,
-        email: authStore.email,
+        email: authStore.user!.email,
       });
     }
   };

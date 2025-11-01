@@ -1,15 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { logoutUser } from '../functions/api.ts';
+import type { User } from '../types/prisma.ts';
 
 export type AuthState = {
   jwt: string | null;
   refreshToken: string | null;
-  email: string | null;
+  user: User | null;
   login: (
     jwt: string,
     refreshToken: string,
-    email: string,
+    user: User,
   ) => void;
   logout: () => void;
   updateToken: (jwt: string, refreshToken: string) => void;
@@ -21,17 +22,18 @@ export const useAuthStore = create<AuthState>()(
       jwt: null,
       refreshToken: null,
       email: null,
+      user: null,
       login: (
         jwt: string,
         refreshToken: string,
-        email: string,
-      ) => set({ jwt, refreshToken, email }),
+        user: User,
+      ) => set({ jwt, refreshToken, user }),
       logout: async () => {
-        const { refreshToken, email } =
+        const { refreshToken, user } =
           useAuthStore.getState();
-        if (email && refreshToken)
-          await logoutUser(email, refreshToken);
-        set({ jwt: null, email: null, refreshToken: null });
+        if (user && refreshToken)
+          await logoutUser(user.email, refreshToken);
+        set({ jwt: null, user: null, refreshToken: null });
       },
       updateToken: (jwt: string, refreshToken: string) =>
         set({ refreshToken: refreshToken, jwt }),

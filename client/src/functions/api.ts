@@ -20,7 +20,6 @@ export async function loginUser(
   email: string,
   password: string,
 ) {
-  console.log(password);
   return await api.post('/auth/login', { email, password });
 }
 

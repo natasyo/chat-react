@@ -2,12 +2,14 @@ import type { User } from '../types/prisma.ts';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+type ChatUser = { user: User; isOnline?: boolean };
+
 type ChatState = {
   users: { user: User; isOnline?: boolean }[];
   currentUser?: User;
   addUser: (user: User) => void;
   removeUser: (user: User) => void;
-  changeOnline: ({ user: User, isOnline: boolean }) => void;
+  changeOnline: (users: ChatUser[]) => void;
 };
 
 export const useChatStore = create<ChatState>()(
@@ -30,9 +32,7 @@ export const useChatStore = create<ChatState>()(
             ),
           }));
         },
-        changeOnline: (
-          users: { user: User; isOnline: boolean }[],
-        ) => {
+        changeOnline: (users: ChatUser[]) => {
           set(() => ({
             users,
           }));

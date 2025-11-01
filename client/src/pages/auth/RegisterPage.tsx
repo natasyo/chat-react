@@ -38,7 +38,7 @@ const RegisterPage = () => {
     setError,
     formState: { errors },
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema as any),
   });
 
   async function RegisterForm(data: RegisterFormData) {

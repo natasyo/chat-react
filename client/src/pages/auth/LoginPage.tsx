@@ -23,10 +23,11 @@ const LoginPage = () => {
         data.email,
         data.password,
       );
+      console.log(data);
       store.login(
         response.data.accessToken,
         response.data.refreshToken,
-        response.data.email,
+        response.data.user,
       );
     } catch (error) {
       console.log(error);

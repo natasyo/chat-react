@@ -108,7 +108,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       typeof body.sender === 'object' && body.sender.email
         ? body.sender.email
         : (body.sender as string);
-    console.log('---------is online------------', body.sender);
     if (body.users && body.users.length > 0 && body.sender) {
       const isOnlineUsers: { user: User; isOnline: boolean }[] = [];
       body.users.forEach((user: User) => {
@@ -116,7 +115,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         isOnlineUsers.push({ isOnline: !!recipient, user });
       });
       const sender = this.clients.get(senderEmail);
-      console.log('---------is online------------', sender);
       if (sender) {
         this.server.to(sender).emit('is_online', isOnlineUsers);
       }
