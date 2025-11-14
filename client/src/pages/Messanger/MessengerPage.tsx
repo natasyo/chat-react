@@ -14,8 +14,8 @@ import type { User } from '../../types/prisma.ts';
 import { useAuth } from '../../hooks/useAuth.ts';
 
 const MessengerPage = () => {
+  const isAuth = useAuth();
   const authStore: AuthState = useAuthStore();
-  const token = useAuth(authStore.jwt);
   const { socket, privateMessages } = useSocket(authStore);
   const [activeRecipient, setActiveRecipient] =
     useState<User | null>(null);
@@ -29,6 +29,9 @@ const MessengerPage = () => {
     }
   }
 
+  useEffect(() => {
+    console.log('isAuth');
+  }, [isAuth]);
   useEffect(() => {
     getPrivateMessages();
   }, [activeRecipient]);

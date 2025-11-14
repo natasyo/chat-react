@@ -37,10 +37,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('Client disconnected', client.id);
   }
 
+  parseCookie(cookieHeader: string | undefined) {
+    if (!cookieHeader) return {};
+    return Object.fromEntries(
+      cookieHeader.split(';').map((c) => {
+        const [key, ...v] = c.trim().split('=');
+        return [key, decodeURIComponent(v.join('='))];
+      }),
+    );
+  }
+
   handleConnection(client: Socket) {
     try {
+      const cookies = this.parseCookie(client.handshake.headers.cookie);
       const token =
-        client.handshake.auth?.token || client.handshake.query?.token;
+        cookies['access_token'] || (client.handshake.query?.token as string);
       if (!token) {
         console.warn('no token provided');
         client.disconnect();

@@ -1,44 +1,34 @@
 import { Button } from '../../ui/Button.tsx';
 import { MessengerMenu } from './MessengerMenu.tsx';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons';
 import { useThemeStore } from '../../store/ThemeStore.ts';
 import { useAuthStore } from '../../store/AuthStore.ts';
-import type { User } from '../../types/prisma.ts';
-import { IMAGE_URL } from '../../../config.ts';
 
 const MessengerHeader = () => {
   const [isShowMenu, setIsShowMenu] = useState(false);
   const { toggleTheme } = useThemeStore();
   const authStore = useAuthStore();
-  const [user, setUser] = useState<User>();
-  useEffect(() => {
-    (async () => {
-      if (authStore && authStore.user) {
-        setUser(authStore.user);
-      }
-    })();
-  }, [authStore.user]);
   return (
     <div
       className={`relative z-20 flex justify-between pt-3 pb-5 px-6 border border-light-panel-stroke/40 dark:border-dark-panel-stroke/40 border-opacity-40 rounded-2xl`}
     >
       <div className="flex items-center">
-        <img
-          src={`${IMAGE_URL}/${user?.profile?.photo}`}
-          alt={`${user?.profile?.name}`}
-          className={`h-18 me-5`}
-        />
+        {/*<img*/}
+        {/*  src={`${IMAGE_URL}/${user?.profile?.photo}`}*/}
+        {/*  alt={`${user?.profile?.name}`}*/}
+        {/*  className={`h-18 me-5`}*/}
+        {/*/>*/}
         <div className="">
           <p
             className={`font-bold text-2xl text-shadow-lg`}
           >
-            {user?.profile?.name} {user?.profile?.surname}
+            {authStore.user?.email}
           </p>
-          <p className={'text-sm'}>
-            {authStore.user!.email}
-          </p>
+          {/*<p className={'text-sm'}>*/}
+          {/*  {authStore.user!.email}*/}
+          {/*</p>*/}
         </div>
       </div>
 

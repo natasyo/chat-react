@@ -1,8 +1,69 @@
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 import type { Profile } from '../types/prisma.ts';
+import { useAuthStore } from '../store/AuthStore.ts';
+
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    _retry?: boolean;
+  }
+}
+let isRefreshing = false;
+let refreshSubscribes: (() => void)[] = [];
 const api = axios.create({
   baseURL: 'http://localhost:3000',
+  withCredentials: true,
 });
+
+const plainApi = axios.create({
+  baseURL: 'http://localhost:3000',
+  withCredentials: true,
+});
+
+function onRefreshed() {
+  refreshSubscribes.forEach((cb) => cb());
+  refreshSubscribes = [];
+}
+
+function addRefreshSubscribes(callback: () => void) {
+  refreshSubscribes.push(callback);
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    console.log('interseptors', error.message);
+    const originRequest = error.config;
+
+    if (
+      error.response?.status === 401 &&
+      originRequest &&
+      !originRequest?._retry
+    ) {
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          addRefreshSubscribes(() =>
+            resolve(api(originRequest)),
+          );
+        });
+      }
+      originRequest._retry = true;
+      isRefreshing = true;
+      try {
+        await refreshToken();
+        onRefreshed();
+        isRefreshing = false;
+        return api(originRequest);
+      } catch (refreshError) {
+        console.log('-------------error');
+        isRefreshing = false;
+        await logoutUser();
+        return Promise.reject(refreshError);
+      }
+    }
+    console.log('-************', originRequest?._retry);
+    return Promise.reject(error);
+  },
+);
 
 export async function registerUser(
   email: string,
@@ -23,25 +84,28 @@ export async function loginUser(
   return await api.post('/auth/login', { email, password });
 }
 
-export async function logoutUser(
-  email: string,
-  refreshToken: string,
-) {
-  console.log('logout');
-  return await api.post('/auth/logout', {
-    email,
-    refreshToken,
-  });
+export async function logoutUser() {
+  const authStore = useAuthStore.getState();
+  try {
+    return await plainApi.post('/auth/logout');
+  } finally {
+    authStore.deleteUser();
+  }
 }
 
-export async function refreshToken(
-  email: string,
-  refreshToken: string,
-) {
-  return await api.post('/auth/refresh-token', {
-    email,
-    refreshToken,
-  });
+export async function refreshToken() {
+  try {
+    console.log('refreshToken');
+    const result = await plainApi.post(
+      '/auth/refresh-token',
+    );
+    console.log('refresh result ', result);
+    console.log('ok');
+    return result;
+  } catch (error) {
+    console.error('refresh field');
+    throw error;
+  }
 }
 export async function getUser(email: string) {
   return await api.get('/users/by-email?email=' + email);
@@ -62,4 +126,8 @@ export async function updateProfile(
   }
   formData.append('user', JSON.stringify(user));
   return await api.put(`/users/${id}`, formData);
+}
+
+export async function checkAuth() {
+  return await api.get('/auth/me');
 }

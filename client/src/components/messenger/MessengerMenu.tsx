@@ -20,7 +20,7 @@ export const MessengerMenu = ({
       </Link>
       <Button
         variant={`primary`}
-        onClick={() => authStore.logout()}
+        onClick={() => authStore.deleteUser()}
       >
         Logout
       </Button>

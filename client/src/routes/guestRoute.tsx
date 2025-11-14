@@ -5,7 +5,7 @@ const GuestRoute = () => {
   const store = useAuthStore();
   return (
     <div>
-      {!store.jwt ? <Outlet /> : <Navigate to={`/`} />}
+      {!store.user ? <Outlet /> : <Navigate to={`/`} />}
     </div>
   );
 };

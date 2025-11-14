@@ -18,9 +18,9 @@ const Header = () => {
           <h2>Chat</h2>
         </Link>
         <div className={`flex items-center`}>
-          {store.jwt ? (
+          {store.user ? (
             <div className={`fex items-center`}>
-              <Button onClick={() => store.logout()}>
+              <Button onClick={() => store.deleteUser()}>
                 Logout
               </Button>
             </div>

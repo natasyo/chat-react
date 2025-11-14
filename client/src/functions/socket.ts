@@ -4,7 +4,7 @@ import type { AuthState } from '../store/AuthStore.ts';
 import { refreshToken } from './api.ts';
 
 export const connectSocket = (authStore: AuthState) => {
-  if (!authStore || !authStore.jwt) return null;
+  if (!authStore || !authStore.user) return null;
   const socket = io(SERVER_URL, {
     auth: {
       token: authStore.jwt,
@@ -22,13 +22,9 @@ export const connectSocket = (authStore: AuthState) => {
     console.error(err);
     if (
       err.message === 'Access token expired' &&
-      authStore.email &&
-      authStore.refreshToken
+      authStore.user
     ) {
-      const response = await refreshToken(
-        authStore.email,
-        authStore.refreshToken,
-      );
+      const response = await refreshToken(authStore.user);
       authStore.updateToken(
         response.data.accessToken,
         response.data.refreshToken,

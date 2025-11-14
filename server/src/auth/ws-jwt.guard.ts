@@ -7,9 +7,8 @@ export class WsJwtGuard implements CanActivate {
   constructor(private readonly authService: AuthService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const client = context.switchToWs().getClient();
-    const token =
-      client.handshake?.auth?.token ||
-      client.handshake?.headers?.authorization?.split(' ')[1];
+    const token = client.handshake.headers.cookie;
+    console.log('wstoken', client);
     if (!token) {
       throw new WsException('Token not provided.');
     }
