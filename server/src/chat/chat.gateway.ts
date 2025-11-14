@@ -15,6 +15,7 @@ import jwt from 'jsonwebtoken';
 import * as process from 'node:process';
 import { ChatService } from './chat.service';
 import { User } from '@prisma/client';
+import { parseCookie } from '../common/functions/parseCookie';
 
 class JwtPayload {}
 
@@ -37,19 +38,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('Client disconnected', client.id);
   }
 
-  parseCookie(cookieHeader: string | undefined) {
-    if (!cookieHeader) return {};
-    return Object.fromEntries(
-      cookieHeader.split(';').map((c) => {
-        const [key, ...v] = c.trim().split('=');
-        return [key, decodeURIComponent(v.join('='))];
-      }),
-    );
-  }
-
   handleConnection(client: Socket) {
     try {
-      const cookies = this.parseCookie(client.handshake.headers.cookie);
+      const cookies = parseCookie(client.handshake.headers.cookie);
       const token =
         cookies['access_token'] || (client.handshake.query?.token as string);
       if (!token) {
