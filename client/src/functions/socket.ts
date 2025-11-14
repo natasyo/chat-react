@@ -6,9 +6,7 @@ import { refreshToken } from './api.ts';
 export const connectSocket = (authStore: AuthState) => {
   if (!authStore || !authStore.user) return null;
   const socket = io(SERVER_URL, {
-    auth: {
-      token: authStore.jwt,
-    },
+    withCredentials: true,
     transports: ['websocket'],
   });
   socket.on('connect', () => {
@@ -24,11 +22,8 @@ export const connectSocket = (authStore: AuthState) => {
       err.message === 'Access token expired' &&
       authStore.user
     ) {
-      const response = await refreshToken(authStore.user);
-      authStore.updateToken(
-        response.data.accessToken,
-        response.data.refreshToken,
-      );
+      const response = await refreshToken();
+
       socket.disconnect();
       connectSocket(response.data.accessToken);
     }
