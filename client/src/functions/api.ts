@@ -1,6 +1,7 @@
 import axios, { type AxiosError } from 'axios';
 import type { Profile } from '../types/prisma.ts';
 import { useAuthStore } from '../store/AuthStore.ts';
+import { SERVER_URL } from '../../config.ts';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -10,12 +11,12 @@ declare module 'axios' {
 let isRefreshing = false;
 let refreshSubscribes: (() => void)[] = [];
 const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: SERVER_URL,
   withCredentials: true,
 });
 
 const plainApi = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: SERVER_URL,
   withCredentials: true,
 });
 
@@ -95,12 +96,9 @@ export async function logoutUser() {
 
 export async function refreshToken() {
   try {
-    console.log('refreshToken');
     const result = await plainApi.post(
       '/auth/refresh-token',
     );
-    console.log('refresh result ', result);
-    console.log('ok');
     return result;
   } catch (error) {
     console.error('refresh field');

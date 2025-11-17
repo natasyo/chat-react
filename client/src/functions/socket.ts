@@ -1,33 +1,48 @@
 import { SERVER_URL } from '../../config.ts';
-import { io } from 'socket.io-client';
-import type { AuthState } from '../store/AuthStore.ts';
+import { io, type Socket } from 'socket.io-client';
+import { useAuthStore } from '../store/AuthStore.ts';
 import { refreshToken } from './api.ts';
 
-export const connectSocket = (authStore: AuthState) => {
+let socket: Socket | null = null;
+let isReconnecting = false;
+
+export const connectSocket = () => {
+  const authStore = useAuthStore.getState();
   if (!authStore || !authStore.user) return null;
-  const socket = io(SERVER_URL, {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+  const newSocket = io(SERVER_URL, {
     withCredentials: true,
     transports: ['websocket'],
   });
-  socket.on('connect', () => {
-    console.log('Connected to server ', socket.id);
+  newSocket.on('connect', () => {
+    console.log('Connected to server ', newSocket.id);
   });
-  socket.on('disconnect', () => {
-    console.log('Disconnected from server ', socket.id);
+  newSocket.on('disconnect', () => {
+    isReconnecting = false;
+    console.log('Disconnected from server ', newSocket.id);
   });
 
-  socket.on('exception', async (err) => {
+  newSocket.on('exception', async (err) => {
     console.error(err);
     if (
       err.message === 'Access token expired' &&
-      authStore.user
+      authStore.user &&
+      !isReconnecting
     ) {
-      const response = await refreshToken();
-
-      socket.disconnect();
-      connectSocket(response.data.accessToken);
+      try {
+        isReconnecting = false;
+        await refreshToken();
+        await new Promise((r) => setTimeout(r, 100));
+        connectSocket();
+      } catch {
+        console.log('Refresh token failed. Logging out.');
+        useAuthStore.getState().deleteUser();
+      }
     }
   });
-
+  socket = newSocket;
   return socket;
 };

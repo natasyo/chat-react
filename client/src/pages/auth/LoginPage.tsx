@@ -29,6 +29,7 @@ const LoginPage = () => {
       );
       if (response.status === 201) {
         const user = await checkAuth();
+        console.log(user);
         authStore.setUser(user?.data);
       }
     } catch (error) {

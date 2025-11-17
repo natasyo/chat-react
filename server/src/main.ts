@@ -5,10 +5,12 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import { join } from 'path';
+import * as fs from 'node:fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {});
   app.use(cookieParser());
+
   app.enableCors({
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { User } from '../types/prisma.ts';
 import { getUsers } from '../functions/api.ts';
 import { useChatStore } from '../store/ChatsStore.ts';
+import { IMAGE_URL } from '../../config.ts';
 
 export const Users = () => {
   const [users, setUsers] = useState<User[]>();
@@ -23,7 +24,7 @@ export const Users = () => {
           className={`flex items-center py-2 px-1 hover:bg-light-panel-stroke hover:dark:text-dark-panel-stroke`}
         >
           <img
-            src={`http://localhost:3000/uploads/${user.profile?.photo}`}
+            src={`${IMAGE_URL}/${user.profile?.photo}`}
             alt={`${user.profile?.name} photo`}
             className="w-10 me-3"
           />

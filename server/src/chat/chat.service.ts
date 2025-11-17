@@ -19,6 +19,7 @@ export class ChatService {
     });
   }
   async getPrivateMessages(userA: string, userB: string) {
+    console.log(userA, userB);
     return this.prisma.message.findMany({
       where: {
         OR: [

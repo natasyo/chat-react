@@ -12,7 +12,9 @@ type Props = {
 };
 export const MessageItems = forwardRef(
   ({ messages, className }: Props, ref) => {
-    const userEmail = useAuthStore((state) => state.email);
+    const userEmail = useAuthStore(
+      (state) => state.user?.email,
+    );
 
     const containerRef = useRef<HTMLDivElement | null>(
       null,

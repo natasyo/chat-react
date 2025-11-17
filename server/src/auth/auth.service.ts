@@ -35,8 +35,8 @@ export class AuthService {
     });
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: EXPIRES_ACCESS_TOKEN * 1000,
     });
     const refreshToken = randomUUID().toString();
@@ -48,8 +48,8 @@ export class AuthService {
     });
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: EXPIRES_REFRESH_TOKEN * 1000,
     });
   };

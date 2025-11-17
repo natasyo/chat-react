@@ -20,7 +20,10 @@ import { parseCookie } from '../common/functions/parseCookie';
 class JwtPayload {}
 
 @WebSocketGateway({
-  cors: { origin: 'http://localhost:5173', credentials: true },
+  cors: {
+    origin: ['https://localhost:5173', 'http://localhost:5173'],
+    credentials: true,
+  },
 })
 @UseFilters(SocketExceptionFilter)
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {

@@ -32,6 +32,7 @@ const MessengerPage = () => {
   useEffect(() => {
     console.log('isAuth');
   }, [isAuth]);
+
   useEffect(() => {
     getPrivateMessages();
   }, [activeRecipient]);
