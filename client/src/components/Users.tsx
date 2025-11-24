@@ -19,6 +19,7 @@ export const Users = () => {
         <p
           onClick={() => {
             chatStore.addUser(user);
+            chatStore.changeActiveRecipient(user);
           }}
           key={user.id}
           className={`flex items-center py-2 px-1 hover:bg-light-panel-stroke hover:dark:text-dark-panel-stroke`}
