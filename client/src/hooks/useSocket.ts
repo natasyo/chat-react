@@ -34,6 +34,7 @@ export function useSocket(authStore: AuthState) {
       setPrivateMessages((prev) => [...prev, data]);
     });
     newSocket?.on('get_private_message', (data) => {
+      console.log('get_private_message', data);
       setPrivateMessages(data ?? '');
     });
 

@@ -9,33 +9,30 @@ import { useSocket } from '../../hooks/useSocket.ts';
 import { Tabs } from '../../ui/tabs/Tabs.tsx';
 import { Tab } from '../../ui/tabs/Tab.tsx';
 import { useChatStore } from '../../store/ChatsStore.ts';
-import { useEffect, useState } from 'react';
-import type { User } from '../../types/prisma.ts';
+import { useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth.ts';
 
 const MessengerPage = () => {
-  const isAuth = useAuth();
+  useAuth();
   const authStore: AuthState = useAuthStore();
   const { socket, privateMessages } = useSocket(authStore);
-  const [activeRecipient, setActiveRecipient] =
-    useState<User | null>(null);
   const chatStore = useChatStore();
+
   function getPrivateMessages() {
-    if (socket && activeRecipient) {
+    if (!!socket && !!chatStore.activeRecipient) {
       socket.emit('get_private_message', {
         sender: authStore.user!.email,
-        recipient: activeRecipient.email,
+        recipient: chatStore.activeRecipient.email,
       });
     }
   }
 
   useEffect(() => {
-    console.log('isAuth');
-  }, [isAuth]);
-
-  useEffect(() => {
-    getPrivateMessages();
-  }, [activeRecipient]);
+    if (chatStore.activeRecipient) {
+      console.log('get messages', chatStore.users);
+      getPrivateMessages();
+    }
+  }, [chatStore.activeRecipient, socket]);
 
   useEffect(() => {
     if (!socket) return;
@@ -59,10 +56,13 @@ const MessengerPage = () => {
   const sendMessage = (input: string) => {
     if (socket && input.trim()) {
       console.log(authStore.user);
-      if (activeRecipient && authStore.user?.email) {
+      if (
+        chatStore.activeRecipient &&
+        authStore.user?.email
+      ) {
         socket.emit('private_message', {
           senderEmail: authStore.user.email,
-          recipientEmail: activeRecipient.email,
+          recipientEmail: chatStore.activeRecipient.email,
           text: input.trim(),
         });
         console.log('private');
@@ -74,28 +74,26 @@ const MessengerPage = () => {
       });
     }
   };
-
-  useEffect(() => {
-    if (chatStore.users.length > 0)
-      setActiveRecipient(chatStore.users[0].user);
-  }, [chatStore.users]);
   return (
     <Layout>
       <>
         {chatStore.users.length > 0 && (
           <Tabs
-            onRemoveTab={(value) => {
+            onRemoveTab={(email) => {
               const user = chatStore.users.find(
-                (user) => user.user.email === value,
+                (user) => user.user.email === email,
               );
               if (user) chatStore.removeUser(user.user);
             }}
-            onSetActiveTab={(value) => {
+            onSetActiveTab={(email) => {
               const user = chatStore.users.find(
-                (user) => user.user.email === value,
+                (user) => user.user.email === email,
               );
-              if (user) setActiveRecipient(user.user);
+              if (user) {
+                chatStore.changeActiveRecipient(user.user);
+              }
             }}
+            activeTab={chatStore.activeRecipient?.email}
           >
             {chatStore.users.map((user) => {
               return (

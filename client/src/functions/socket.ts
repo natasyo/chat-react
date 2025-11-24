@@ -1,13 +1,16 @@
 import { SERVER_URL } from '../../config.ts';
 import { io, type Socket } from 'socket.io-client';
-import { useAuthStore } from '../store/AuthStore.ts';
+import {
+  type AuthState,
+  useAuthStore,
+} from '../store/AuthStore.ts';
 import { refreshToken } from './api.ts';
 
 let socket: Socket | null = null;
 let isReconnecting = false;
 
-export const connectSocket = () => {
-  const authStore = useAuthStore.getState();
+export const connectSocket = (authStore: AuthState) => {
+  // const authStore = useAuthStore.getState();
   if (!authStore || !authStore.user) return null;
   if (socket) {
     socket.disconnect();
@@ -36,7 +39,7 @@ export const connectSocket = () => {
         isReconnecting = false;
         await refreshToken();
         await new Promise((r) => setTimeout(r, 100));
-        connectSocket();
+        connectSocket(authStore);
       } catch {
         console.log('Refresh token failed. Logging out.');
         useAuthStore.getState().deleteUser();

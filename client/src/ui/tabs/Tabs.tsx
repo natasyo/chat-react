@@ -1,6 +1,10 @@
 // @flow
 
-import { type ReactElement, useState } from 'react';
+import {
+  type ReactElement,
+  useEffect,
+  useState,
+} from 'react';
 import type { TabProps } from './Tab.tsx';
 import { Button } from '../Button.tsx';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
@@ -11,17 +15,21 @@ interface TabsProps {
   children: ReactElement<TabProps>[];
   onRemoveTab?: (value: string) => void;
   onSetActiveTab?: (value: string) => void;
+  activeTab?: string;
 }
 export const Tabs = ({
   defaultValue,
   children,
   onRemoveTab,
   onSetActiveTab,
+  activeTab,
 }: TabsProps) => {
   const [active, setActive] = useState<string>(
     defaultValue ?? children[0].props.value,
   );
-
+  useEffect(() => {
+    if (activeTab) setActive(activeTab);
+  }, [activeTab]);
   return (
     <div className={`flex-1 flex flex-col min-h-0`}>
       <div className={`flex my-3`}>
