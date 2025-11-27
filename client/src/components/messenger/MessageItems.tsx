@@ -5,6 +5,8 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react';
+import { faCheck } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 type Props = {
   messages: { email: string; text: string }[];
@@ -55,7 +57,15 @@ export const MessageItems = forwardRef(
                 >
                   {msg.email}
                 </p>
-                <p>{msg.text}</p>
+                <div className="flex justify-end relative items-center">
+                  <p>{msg.text}</p>
+                  {msg.email === userEmail && (
+                    <FontAwesomeIcon
+                      icon={faCheck}
+                      className={` ms-2 text-sm  text-green-800`}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           );

@@ -26,6 +26,10 @@ class JwtPayload {}
   },
 })
 @UseFilters(SocketExceptionFilter)
+@UseGuards(WsJwtGuard)
+@WebSocketGateway({
+  cors: { origin: true, credentials: true },
+})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private clients = new Map<string, string>();
   @WebSocketServer()
@@ -66,13 +70,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('message')
   handleMessage(@MessageBody() body: MessageDTO) {
     this.server.emit('message', body);
   }
 
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('private_message')
   async handlePrivateMessage(@MessageBody() body: MessagePrivateDTO) {
     const recipientSocketEmail = this.clients.get(body.recipientEmail);
@@ -88,7 +90,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @UseGuards(WsJwtGuard)
   @SubscribeMessage('get_private_message')
   async getPrivateMessages(
     @MessageBody() body: { sender: string; recipient: string },
@@ -104,7 +105,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
     }
   }
-  @UseGuards(WsJwtGuard)
+
   @SubscribeMessage('is_online')
   async getIsOnline(
     @MessageBody() body: { sender: string | User; users: User[] },

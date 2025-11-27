@@ -4,29 +4,37 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import jwt from 'jsonwebtoken';
 import * as process from 'node:process';
+import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
+import { IS_PUBLIC_KEY } from './decorators/public.decorator';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
-    const request = context.switchToHttp().getRequest();
-    console.log(request.cookies);
-    const token = request.cookies.access_token;
+  constructor(
+    private reflector: Reflector,
+    private jwt: JwtService,
+  ) {}
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const isPublic = this.reflector.get<boolean>(
+      IS_PUBLIC_KEY,
+      context.getHandler(),
+    );
+    if (isPublic) {
+      return true;
+    }
+    const req = context.switchToHttp().getRequest();
+    const token = req.cookies?.access_token;
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('No token provided');
     }
     try {
-      request.user = jwt.verify(token, process.env.JWT_SECRET!);
+      req.user = await this.jwt.verifyAsync(token, {
+        secret: process.env.SECRET_KEY,
+      });
       return true;
-    } catch (err) {
-      if (err.name === 'TokenExpiredError') {
-        throw new UnauthorizedException('Access token expired');
-      }
-      throw new UnauthorizedException();
+    } catch (error) {
+      throw new UnauthorizedException(error.message);
     }
   }
 }

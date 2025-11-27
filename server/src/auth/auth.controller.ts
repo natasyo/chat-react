@@ -12,19 +12,22 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { LogoutDto } from './dto/logout.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { PrismaClientExceptionFilter } from '../common/filters/prisma-exception.filter';
+import { Public } from './decorators/public.decorator';
 
 @UseFilters(new PrismaClientExceptionFilter())
 @Controller('auth')
 export class AuthController {
   constructor(private auth: AuthService) {}
+
+  @Public()
   @Post('register')
   register(@Body() dto: RegisterDto) {
     return this.auth.register(dto);
   }
 
+  @Public()
   @Post('login')
   async login(
     @Body() dto: LoginDto,
@@ -37,7 +40,7 @@ export class AuthController {
   async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
     return await this.auth.logout(req, res);
   }
-
+  @Public()
   @Post('refresh-token')
   async refreshToken(
     @Req() req: Request,
