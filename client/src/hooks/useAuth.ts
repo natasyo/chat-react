@@ -9,7 +9,6 @@ export const useAuth = () => {
     (async () => {
       const result = await checkAuth();
       if (!isMounted) return;
-      console.log(result);
       if (result && result.data) {
         user.setUser(result.data);
       }

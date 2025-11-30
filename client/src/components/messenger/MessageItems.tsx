@@ -7,9 +7,10 @@ import {
 } from 'react';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { Message } from '../../types/prisma.ts';
 
 type Props = {
-  messages: { email: string; text: string }[];
+  messages: Message[];
   className?: string;
 };
 export const MessageItems = forwardRef(
@@ -47,7 +48,7 @@ export const MessageItems = forwardRef(
           return (
             <div
               key={i}
-              className={` ${msg.email === userEmail ? 'text-right' : ''}`}
+              className={` ${msg.senderEmail === userEmail ? 'text-right' : ''}`}
             >
               <div
                 className={` p-2 my-2 border max-w-full inline-block rounded-2xl overflow-hidden`}
@@ -55,11 +56,11 @@ export const MessageItems = forwardRef(
                 <p
                   className={`text-sm text-gray-400 italic break-words`}
                 >
-                  {msg.email}
+                  {msg.senderEmail}
                 </p>
                 <div className="flex justify-end relative items-center">
                   <p>{msg.text}</p>
-                  {msg.email === userEmail && (
+                  {msg.senderEmail === userEmail && (
                     <FontAwesomeIcon
                       icon={faCheck}
                       className={` ms-2 text-sm  text-green-800`}

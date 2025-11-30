@@ -1,9 +1,14 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { AuthPayload, AuthService } from './auth.service';
 import { WsException } from '@nestjs/websockets';
 import { parseCookie } from '../common/functions/parseCookie';
 import { Reflector } from '@nestjs/core';
 import { WS_PUBLIC_KEY } from './decorators/ws-public.decorator';
+import { Socket } from 'socket.io';
+
+export interface AuthSocket extends Socket {
+  user?: AuthPayload;
+}
 
 @Injectable()
 export class WsJwtGuard implements CanActivate {

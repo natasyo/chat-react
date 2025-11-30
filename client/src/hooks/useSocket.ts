@@ -5,6 +5,7 @@ import type { Socket } from 'socket.io-client';
 import type { DefaultEventsMap } from 'socket.io';
 import type { Message } from '../types/prisma.ts';
 import { useChatStore } from '../store/ChatsStore.ts';
+import { useUsers } from '../store/UsersStore.ts';
 
 export function useSocket(authStore: AuthState) {
   const chats = useChatStore();
@@ -18,8 +19,8 @@ export function useSocket(authStore: AuthState) {
   const [privateMessages, setPrivateMessages] = useState<
     Message[]
   >([]);
+  const usersState = useUsers();
   useEffect(() => {
-    console.log(authStore);
     if (!authStore) return;
     const newSocket = connectSocket(authStore);
     setSocket(newSocket);
@@ -31,13 +32,22 @@ export function useSocket(authStore: AuthState) {
       },
     );
     newSocket?.on('private_message', (data: Message) => {
-      setPrivateMessages((prev) => [...prev, data]);
+      if (data) {
+        setPrivateMessages((prev) => [...prev, data]);
+      }
     });
     newSocket?.on('get_private_message', (data) => {
-      console.log('get_private_message', data);
       setPrivateMessages(data ?? '');
     });
 
+    // newSocket?.on(
+    //   'set_message_status',
+    //   (data: { status: MessageState; id: string }) => {},
+    // );
+
+    newSocket?.on('get_count_new_messages', (data) => {
+      usersState.setCountNewMessages(data);
+    });
     newSocket?.on('is_online', (data) => {
       chats.changeOnline(data);
     });
