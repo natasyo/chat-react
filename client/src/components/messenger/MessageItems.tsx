@@ -22,7 +22,9 @@ export const MessageItems = forwardRef(
     const containerRef = useRef<HTMLDivElement | null>(
       null,
     );
-
+    const itemsRef = useRef<
+      Record<string, HTMLElement | null>
+    >({});
     useImperativeHandle(ref, () => ({
       scrollToBottom: (smooth = false) => {
         if (containerRef.current) {
@@ -34,20 +36,47 @@ export const MessageItems = forwardRef(
       },
     }));
     useEffect(() => {
-      if (containerRef.current) {
-        containerRef.current.scrollTop =
-          containerRef.current.scrollHeight;
+      const container = containerRef.current;
+      if (!container) return;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
       }
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const id =
+                entry.target.getAttribute('data-id');
+              if (id) {
+                console.log(id);
+              }
+            }
+          });
+        },
+        { root: container, threshold: 0.6 },
+      );
+      messages.map((msg) => {
+        const el = itemsRef.current[msg.id];
+        if (!el) return;
+        observer.observe(el);
+      });
+      return () => {
+        observer.disconnect();
+      };
     }, [messages.length]);
     return (
       <div
         className={`${className ?? ''} `}
         ref={containerRef}
       >
-        {messages.map((msg, i) => {
+        {messages.map((msg) => {
           return (
             <div
-              key={i}
+              key={msg.id}
+              data-id={msg.id}
+              ref={(el) => {
+                itemsRef.current[msg.id] = el;
+              }}
               className={` ${msg.senderEmail === userEmail ? 'text-right' : ''}`}
             >
               <div
