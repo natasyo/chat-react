@@ -45,9 +45,12 @@ export function useSocket(authStore: AuthState) {
     //   (data: { status: MessageState; id: string }) => {},
     // );
 
-    newSocket?.on('get_count_new_messages', (data) => {
-      usersState.setCountNewMessages(data);
-    });
+    newSocket?.on(
+      'get_count_new_messages',
+      (data: { senderEmail: string; count: number }[]) => {
+        usersState.setCountNewMessages(data);
+      },
+    );
     newSocket?.on('is_online', (data) => {
       chats.changeOnline(data);
     });

@@ -11,7 +11,7 @@ export interface UsersState {
   setCountNewMessages: (
     data: {
       senderEmail: string;
-      count: string;
+      count: number;
     }[],
   ) => void;
 }
@@ -22,14 +22,17 @@ export const useUsers = create<UsersState>((set, get) => ({
   setCountNewMessages: (
     data: {
       senderEmail: string;
-      count: string;
+      count: number;
     }[],
   ) => {
     const map = new Map(
       data.map((item) => [item.senderEmail, item.count]),
     );
-
-    console.log(map);
     const users = get().users;
+    const newUsers = users.map((user) => ({
+      ...user,
+      countNewMessages: map.get(user.email),
+    }));
+    set({ users: newUsers });
   },
 }));
