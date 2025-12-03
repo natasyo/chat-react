@@ -36,8 +36,10 @@ export class AuthController {
     return this.auth.login(dto, res);
   }
 
+  @Public()
   @Post('logout')
   async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
+    console.log('logout');
     return await this.auth.logout(req, res);
   }
   @Public()

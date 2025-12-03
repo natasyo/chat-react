@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 import { EXPIRES_ACCESS_TOKEN, EXPIRES_REFRESH_TOKEN } from '../../config';
 import { Response, Request } from 'express';
 import { User, RefreshTokens } from '@prisma/client';
-type Payload = {
+export type AuthPayload = {
   sub: string;
   email: string;
   jti: string;
@@ -28,7 +28,7 @@ export class AuthService {
     });
   }
 
-  setTokens = async (payloadAccess: Payload, user: User, res: Response) => {
+  setTokens = async (payloadAccess: AuthPayload, user: User, res: Response) => {
     const accessToken = await this.jwtService.signAsync(payloadAccess, {
       secret: process.env.SECRET_KEY,
       expiresIn: EXPIRES_ACCESS_TOKEN,
@@ -61,7 +61,7 @@ export class AuthService {
     if (!user || !user.password) throw new UnauthorizedException();
     const isMatch = await bcrypt.compare(loginDto.password, user.password);
     if (!isMatch) throw new UnauthorizedException();
-    const payloadAccess: Payload = {
+    const payloadAccess: AuthPayload = {
       sub: user.id,
       email: user.email,
       jti: randomUUID(),

@@ -1,21 +1,13 @@
-import { useEffect, useState } from 'react';
-import type { User } from '../types/prisma.ts';
-import { getUsers } from '../functions/api.ts';
 import { useChatStore } from '../store/ChatsStore.ts';
 import { IMAGE_URL } from '../../config.ts';
+import { useUsers } from '../store/UsersStore.ts';
 
 export const Users = () => {
-  const [users, setUsers] = useState<User[]>();
-  useEffect(() => {
-    (async () => {
-      const usersData = await getUsers();
-      setUsers(usersData.data as User[]);
-    })();
-  }, []);
+  const usersData = useUsers();
   const chatStore = useChatStore();
   return (
     <div>
-      {users?.map((user) => (
+      {usersData.users.map((user) => (
         <p
           onClick={() => {
             chatStore.addUser(user);

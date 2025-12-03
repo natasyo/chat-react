@@ -23,9 +23,6 @@ export const MessageItems = forwardRef(
       null,
     );
 
-    const itemsRef = useRef<
-      Record<string, HTMLElement | null>
-    >({});
     useImperativeHandle(ref, () => ({
       scrollToBottom: (smooth = false) => {
         if (containerRef.current) {
@@ -42,49 +39,16 @@ export const MessageItems = forwardRef(
           containerRef.current.scrollHeight;
       }
     }, [messages.length]);
-
-    useEffect(() => {
-      const container = containerRef.current;
-      if (!container) return;
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const id =
-                entry.target.getAttribute('data-id');
-              if (id) {
-                console.log(id);
-              }
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        { root: containerRef.current, threshold: 0.6 },
-      );
-      messages.forEach((msg) => {
-        const el = itemsRef.current[msg.id];
-        if (!el) return;
-        observer.observe(el);
-      });
-      return () => {
-        observer.disconnect();
-      };
-    }, [messages.length]);
-
     return (
       <div
         className={`${className ?? ''} `}
         ref={containerRef}
       >
-        {messages.map((msg) => {
+        {messages.map((msg, i) => {
           return (
             <div
-              key={msg.id}
+              key={i}
               className={` ${msg.senderEmail === userEmail ? 'text-right' : ''}`}
-              data-id={msg.id}
-              ref={(el) => {
-                itemsRef.current[msg.id] = el;
-              }}
             >
               <div
                 className={` p-2 my-2 border max-w-full inline-block rounded-2xl overflow-hidden`}

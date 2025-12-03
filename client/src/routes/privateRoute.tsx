@@ -3,7 +3,6 @@ import { useAuthStore } from '../store/AuthStore.ts';
 
 const PrivateRoute = () => {
   const authStore = useAuthStore();
-  console.log(authStore);
   return (
     <div>
       {authStore.user && authStore.user.email ? (

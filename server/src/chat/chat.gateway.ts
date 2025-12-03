@@ -1,4 +1,5 @@
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -7,14 +8,15 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import type { MessagePrivateDTO, MessageDTO } from './dto';
+import type { MessageDTO, MessagePrivateDTO } from './dto';
 import { UseFilters, UseGuards } from '@nestjs/common';
+import * as WsJWTGuard from '../auth/ws-jwt.guard';
 import { WsJwtGuard } from '../auth/ws-jwt.guard';
 import { SocketExceptionFilter } from './socket-exception.filter';
 import jwt from 'jsonwebtoken';
 import * as process from 'node:process';
 import { ChatService } from './chat.service';
-import { User } from '@prisma/client';
+import type { User } from '@prisma/client';
 import { parseCookie } from '../common/functions/parseCookie';
 
 class JwtPayload {}
@@ -81,12 +83,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const senderSocketEmail = this.clients.get(body.senderEmail);
     const message = await this.chatService.savePrivateMessage(body);
     if (recipientSocketEmail) {
-      this.server.to(recipientSocketEmail).emit('private_message', message);
-    }
-    if (senderSocketEmail) {
-      this.server.to(senderSocketEmail).emit('private_message', message);
+      const isSend = this.server
+        .to(recipientSocketEmail)
+        .emit('private_message', message);
+      if (isSend) {
+        await this.chatService.updatePrivateMessage(message.id, {
+          state: 'DELIVERED',
+        });
+      }
     } else {
       console.log(`⚠️ User ${body.recipientEmail} is offline`);
+    }
+    if (senderSocketEmail && message) {
+      this.server.to(senderSocketEmail).emit('private_message', message);
     }
   }
 
@@ -123,6 +132,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const sender = this.clients.get(senderEmail);
       if (sender) {
         this.server.to(sender).emit('is_online', isOnlineUsers);
+      }
+    }
+  }
+
+  @SubscribeMessage('get_count_new_messages')
+  async getCountNewMessages(@ConnectedSocket() client: WsJWTGuard.AuthSocket) {
+    if (client.user) {
+      console.log('get count');
+      const sender = this.clients.get(client.user.email);
+      if (sender) {
+        const result = await this.chatService.getNewCountMessages(
+          client.user?.email,
+        );
+        console.log(result);
+        this.server.to(sender).emit('get_count_new_messages', result);
       }
     }
   }

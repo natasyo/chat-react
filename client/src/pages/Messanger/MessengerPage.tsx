@@ -11,15 +11,26 @@ import { Tab } from '../../ui/tabs/Tab.tsx';
 import { useChatStore } from '../../store/ChatsStore.ts';
 import { useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth.ts';
+import { getUsers } from '../../functions/api.ts';
+import type { User } from '../../types/prisma.ts';
+import { useUsers } from '../../store/UsersStore.ts';
 
 const MessengerPage = () => {
   useAuth();
+  const usersStore = useUsers();
   const authStore: AuthState = useAuthStore();
   const { socket, privateMessages } = useSocket(authStore);
   const chatStore = useChatStore();
 
+  useEffect(() => {
+    (async () => {
+      const usersData = await getUsers();
+      usersStore.addUsers(usersData.data as User[]);
+    })();
+  }, []);
+
   function getPrivateMessages() {
-    if (!!socket && !!chatStore.activeRecipient) {
+    if (socket && chatStore.activeRecipient) {
       socket.emit('get_private_message', {
         sender: authStore.user!.email,
         recipient: chatStore.activeRecipient.email,
@@ -27,12 +38,22 @@ const MessengerPage = () => {
     }
   }
 
+  function getCountNewMessages() {
+    if (socket) {
+      socket.emit('get_count_new_messages');
+      console.log('get_count_new_messages');
+    }
+  }
+
   useEffect(() => {
     if (chatStore.activeRecipient) {
-      console.log('get messages', chatStore.users);
       getPrivateMessages();
     }
   }, [chatStore.activeRecipient, socket]);
+
+  useEffect(() => {
+    getCountNewMessages();
+  }, [socket]);
 
   useEffect(() => {
     if (!socket) return;
@@ -104,12 +125,7 @@ const MessengerPage = () => {
                   isOnline={user.isOnline}
                 >
                   <MessageItems
-                    messages={privateMessages.map(
-                      (msg) => ({
-                        text: msg.text,
-                        email: msg.senderEmail,
-                      }),
-                    )}
+                    messages={privateMessages}
                     className={`flex-1 overflow-y-auto px-2 min-h-0`}
                   />
                   <InputText sendMessage={sendMessage} />
