@@ -8,6 +8,7 @@ import {
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { Message } from '../../types/prisma.ts';
+import { useSocket } from '../../hooks/useSocket.ts';
 
 type Props = {
   messages: Message[];
@@ -18,6 +19,8 @@ export const MessageItems = forwardRef(
     const userEmail = useAuthStore(
       (state) => state.user?.email,
     );
+    const authState = useAuthStore();
+    const { socket } = useSocket(authState);
 
     const containerRef = useRef<HTMLDivElement | null>(
       null,
@@ -41,14 +44,23 @@ export const MessageItems = forwardRef(
       if (container) {
         container.scrollTop = container.scrollHeight;
       }
+    }, [messages.length]);
+
+    useEffect(() => {
+      const container = containerRef.current;
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
               const id =
                 entry.target.getAttribute('data-id');
-              if (id) {
-                console.log(id);
+              if (id && socket) {
+                console.log('pppp');
+                socket.emit('set_status_read', { id });
+                console.log(
+                  '+++++++++++pppp',
+                  socket.connected,
+                );
               }
             }
           });
@@ -63,7 +75,8 @@ export const MessageItems = forwardRef(
       return () => {
         observer.disconnect();
       };
-    }, [messages.length]);
+    }, [messages.length, socket]);
+
     return (
       <div
         className={`${className ?? ''} `}

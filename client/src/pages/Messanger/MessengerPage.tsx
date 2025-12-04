@@ -21,7 +21,6 @@ const MessengerPage = () => {
   const authStore: AuthState = useAuthStore();
   const { socket, privateMessages } = useSocket(authStore);
   const chatStore = useChatStore();
-
   useEffect(() => {
     (async () => {
       const usersData = await getUsers();

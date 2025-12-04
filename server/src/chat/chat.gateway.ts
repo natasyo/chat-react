@@ -29,9 +29,6 @@ class JwtPayload {}
 })
 @UseFilters(SocketExceptionFilter)
 @UseGuards(WsJwtGuard)
-@WebSocketGateway({
-  cors: { origin: true, credentials: true },
-})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private clients = new Map<string, string>();
   @WebSocketServer()
@@ -52,6 +49,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const cookies = parseCookie(client.handshake.headers.cookie);
       const token =
         cookies['access_token'] || (client.handshake.query?.token as string);
+      console.log(token);
       if (!token) {
         console.warn('no token provided');
         client.disconnect();
@@ -82,6 +80,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const recipientSocketEmail = this.clients.get(body.recipientEmail);
     const senderSocketEmail = this.clients.get(body.senderEmail);
     const message = await this.chatService.savePrivateMessage(body);
+
     if (recipientSocketEmail) {
       const isSend = this.server
         .to(recipientSocketEmail)
@@ -103,6 +102,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async getPrivateMessages(
     @MessageBody() body: { sender: string; recipient: string },
   ) {
+    console.log('get_private_messages');
     const data = await this.chatService.getPrivateMessages(
       body.sender,
       body.recipient,
@@ -149,5 +149,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.server.to(sender).emit('get_count_new_messages', result);
       }
     }
+  }
+
+  @SubscribeMessage('set_status_read')
+  async setStatusRead(@MessageBody() payload: { id?: string }) {
+    console.log('___________________________set_status_read');
   }
 }
