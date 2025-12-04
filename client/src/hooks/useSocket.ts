@@ -27,6 +27,9 @@ export function useSocket(authStore: AuthState) {
         setMessages((prev) => [...prev, data]);
       },
     );
+    newSocket?.on('set_status_read', (data) => {
+      newSocket?.emit('get_private_message', data);
+    });
     newSocket?.on('private_message', (data: Message) => {
       if (data) {
         setPrivateMessages((prev) => [...prev, data]);

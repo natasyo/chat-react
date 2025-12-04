@@ -152,7 +152,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('set_status_read')
-  async setStatusRead(@MessageBody() payload: { id?: string }) {
-    console.log('___________________________set_status_read');
+  async setStatusRead(
+    @MessageBody() payload: { id?: string },
+    @ConnectedSocket() client: WsJWTGuard.AuthSocket,
+  ) {
+    const userEmail = client.user?.email;
+    if (payload.id && userEmail)
+      return await this.chatService.setStatusRead(payload.id, userEmail);
   }
 }

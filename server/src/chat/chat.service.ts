@@ -53,4 +53,15 @@ export class ChatService {
       count: item._count.id,
     }));
   }
+  async setStatusRead(id: string, email: string) {
+    return this.prisma.message.update({
+      where: {
+        id,
+      },
+      data: {
+        state: 'READ',
+      },
+    });
+  }
+  S;
 }

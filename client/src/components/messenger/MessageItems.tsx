@@ -55,12 +55,16 @@ export const MessageItems = forwardRef(
               const id =
                 entry.target.getAttribute('data-id');
               if (id && socket) {
-                console.log('pppp');
-                socket.emit('set_status_read', { id });
-                console.log(
-                  '+++++++++++pppp',
-                  socket.connected,
+                const message = messages.find(
+                  (msg) => msg.id === id,
                 );
+                if (
+                  message?.senderEmail !== userEmail &&
+                  (message?.state === 'DELIVERED' ||
+                    message?.state === 'SENT')
+                ) {
+                  socket.emit('set_status_read', { id });
+                }
               }
             }
           });
@@ -103,10 +107,18 @@ export const MessageItems = forwardRef(
                 <div className="flex justify-end relative items-center">
                   <p>{msg.text}</p>
                   {msg.senderEmail === userEmail && (
-                    <FontAwesomeIcon
-                      icon={faCheck}
-                      className={` ms-2 text-sm  text-green-800`}
-                    />
+                    <div>
+                      <FontAwesomeIcon
+                        icon={faCheck}
+                        className={` ms-2 -me-1 text-sm   text-green-800`}
+                      />
+                      {msg.state === 'READ' && (
+                        <FontAwesomeIcon
+                          icon={faCheck}
+                          className={` -ms-1 text-sm  text-green-800`}
+                        />
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
