@@ -22,11 +22,14 @@ export const Users = () => {
             className="w-10 me-3"
           />
           {user.profile?.name} {user.profile?.surname}
-          <span
-            className={`ms-2 rounded-full h-7 w-7 flex items-center justify-center text-white text-sm font-bold bg-green-600 `}
-          >
-            {user.countNewMessages}
-          </span>
+          {user.countNewMessages &&
+            user.countNewMessages > 0 && (
+              <span
+                className={`ms-2 rounded-full h-7 w-7 flex items-center justify-center text-white text-sm font-bold bg-green-600 `}
+              >
+                {user.countNewMessages}
+              </span>
+            )}
         </p>
       ))}
     </div>

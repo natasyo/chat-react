@@ -84,7 +84,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (recipientSocketEmail) {
       const isSend = this.server
         .to(recipientSocketEmail)
-        .emit('private_message', message);
+        .emit('get_new_private_message', message);
       if (isSend) {
         await this.chatService.updatePrivateMessage(message.id, {
           state: 'DELIVERED',
@@ -157,7 +157,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: WsJWTGuard.AuthSocket,
   ) {
     const userEmail = client.user?.email;
-    if (payload.id && userEmail)
-      return await this.chatService.setStatusRead(payload.id, userEmail);
+    if (payload.id && userEmail) {
+      const message = await this.chatService.setStatusRead(
+        payload.id,
+        userEmail,
+      );
+      const senderEmail = message.senderEmail;
+      if (senderEmail) {
+        const sender = this.clients.get(senderEmail);
+        if (sender) this.server.to(sender).emit('set_status_read', message);
+      }
+    }
+    return null;
   }
 }

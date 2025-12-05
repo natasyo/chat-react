@@ -75,7 +75,6 @@ const MessengerPage = () => {
 
   const sendMessage = (input: string) => {
     if (socket && input.trim()) {
-      console.log(authStore.user);
       if (
         chatStore.activeRecipient &&
         authStore.user?.email
