@@ -1,0 +1,40 @@
+export type MessageState = "SENT" | "DELIVERED" | "READ";
+export interface User {
+    id: string;
+    email: string;
+    password: string;
+    name: string | null;
+    lastName: string | null;
+    createdAt: Date;
+    RefreshTokens?: RefreshTokens[];
+    profile?: Profile | null;
+    sentMessages?: Message[];
+    receivedMessages?: Message[];
+}
+export interface Profile {
+    id: string;
+    name: string | null;
+    surname: string | null;
+    photo: string | null;
+    userId: string;
+    user?: User;
+}
+export interface RefreshTokens {
+    id: string;
+    token: string;
+    createdAt: Date;
+    userId: string;
+    user?: User;
+}
+export interface Message {
+    id: string;
+    text: string;
+    senderEmail: string;
+    recipientEmail: string;
+    sender?: User;
+    recipient?: User;
+    createdAt: Date;
+    readAt: Date | null;
+    state: MessageState;
+}
+//# sourceMappingURL=prisma.d.ts.map
