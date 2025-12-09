@@ -7,7 +7,7 @@ import {
 } from 'react';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { Message } from '../../types/prisma.ts';
+import type { Message } from '@chat/shared';
 import { useSocket } from '../../hooks/useSocket.ts';
 
 type Props = {

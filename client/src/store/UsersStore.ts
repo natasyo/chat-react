@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { User } from '../types/prisma.ts';
+import type { User } from '@chat/shared';
 
 export interface UserState extends User {
   countNewMessages?: number;

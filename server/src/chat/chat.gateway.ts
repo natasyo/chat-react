@@ -8,7 +8,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import type { MessageDTO, MessagePrivateDTO } from './dto';
+import { GetMessagesDto, MessageDTO, MessagePrivateDTO } from './dto';
 import { UseFilters, UseGuards } from '@nestjs/common';
 import * as WsJWTGuard from '../auth/ws-jwt.guard';
 import { WsJwtGuard } from '../auth/ws-jwt.guard';
@@ -100,13 +100,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('get_private_message')
   async getPrivateMessages(
-    @MessageBody() body: { sender: string; recipient: string },
+    @MessageBody()
+    body: GetMessagesDto,
   ) {
     console.log('get_private_messages');
-    const data = await this.chatService.getPrivateMessages(
-      body.sender,
-      body.recipient,
-    );
+    const data = await this.chatService.getPrivateMessages({ ...body });
     if (data) {
       const sender = this.clients.get(body.sender);
       if (sender) {

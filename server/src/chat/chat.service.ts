@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { MessagePrivateDTO } from './dto';
+import { GetMessagesDto, MessagePrivateDTO } from './dto';
 import { Message } from '@prisma/client';
 
 @Injectable()
@@ -19,16 +19,21 @@ export class ChatService {
       },
     });
   }
-  async getPrivateMessages(userA: string, userB: string) {
-    console.log(userA, userB);
-
+  async getPrivateMessages({
+    sender,
+    recipient,
+    cursor,
+    take,
+  }: GetMessagesDto) {
     return this.prisma.message.findMany({
       where: {
         OR: [
-          { recipientEmail: userA, senderEmail: userB },
-          { recipientEmail: userB, senderEmail: userA },
+          { recipientEmail: recipient, senderEmail: sender },
+          { recipientEmail: sender, senderEmail: recipient },
         ],
       },
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      take,
     });
   }
   async updatePrivateMessage(messageId: string, message: Partial<Message>) {

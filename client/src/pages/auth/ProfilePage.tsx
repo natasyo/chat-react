@@ -2,7 +2,7 @@ import { Layout } from './Layout.tsx';
 import { Input } from '../../ui/Input.tsx';
 import { useAuthStore } from '../../store/AuthStore.ts';
 import { useEffect, useState } from 'react';
-import type { Profile, User } from '../../types/prisma.ts';
+import type { Profile, User } from '@chat/shared';
 import {
   getUser,
   updateProfile,

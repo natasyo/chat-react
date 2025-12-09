@@ -12,8 +12,14 @@ import { useChatStore } from '../../store/ChatsStore.ts';
 import { useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth.ts';
 import { getUsers } from '../../functions/api.ts';
-import type { User } from '../../types/prisma.ts';
+import type { User } from '@chat/shared';
 import { useUsers } from '../../store/UsersStore.ts';
+import {
+  getCountNewMessages,
+  getPrivateMessages,
+  sendIsOnline,
+  sendMessage,
+} from '../../functions/messages/cruidMessages.ts';
 
 const MessengerPage = () => {
   useAuth();
@@ -28,71 +34,35 @@ const MessengerPage = () => {
     })();
   }, []);
 
-  function getPrivateMessages() {
-    if (socket && chatStore.activeRecipient) {
-      socket.emit('get_private_message', {
-        sender: authStore.user!.email,
-        recipient: chatStore.activeRecipient.email,
-      });
-    }
-  }
-
-  function getCountNewMessages() {
-    if (socket) {
-      socket.emit('get_count_new_messages');
-      console.log('get_count_new_messages');
-    }
-  }
-
   useEffect(() => {
-    if (chatStore.activeRecipient) {
-      getPrivateMessages();
+    if (chatStore.activeRecipient && authStore.user) {
+      getPrivateMessages(
+        {
+          sender: authStore.user.email,
+          recipient: chatStore.activeRecipient.email,
+          take: 20,
+        },
+        socket,
+      );
     }
   }, [chatStore.activeRecipient, socket]);
 
   useEffect(() => {
-    getCountNewMessages();
+    getCountNewMessages(socket);
   }, [socket]);
 
   useEffect(() => {
     if (!socket) return;
-    const sendIsOnline = () => {
-      const users = chatStore.users.map(
-        (user) => user.user,
-      );
-      socket.emit('is_online', {
-        users: users,
-        sender: authStore.user!.email,
-      });
-    };
-    sendIsOnline();
-    const interval = setInterval(sendIsOnline, 1000);
 
+    sendIsOnline(chatStore, authStore, socket);
+    const interval = setInterval(() => {
+      sendIsOnline(chatStore, authStore, socket);
+    }, 1000);
     return () => {
       clearInterval(interval);
     };
   }, [socket]);
 
-  const sendMessage = (input: string) => {
-    if (socket && input.trim()) {
-      if (
-        chatStore.activeRecipient &&
-        authStore.user?.email
-      ) {
-        socket.emit('private_message', {
-          senderEmail: authStore.user.email,
-          recipientEmail: chatStore.activeRecipient.email,
-          text: input.trim(),
-        });
-        console.log('private');
-        return;
-      }
-      socket.emit('message', {
-        text: input,
-        email: authStore.user!.email,
-      });
-    }
-  };
   return (
     <Layout>
       <>
@@ -126,7 +96,16 @@ const MessengerPage = () => {
                     messages={privateMessages}
                     className={`flex-1 overflow-y-auto px-2 min-h-0`}
                   />
-                  <InputText sendMessage={sendMessage} />
+                  <InputText
+                    sendMessage={(input) => {
+                      sendMessage(
+                        input,
+                        chatStore,
+                        authStore,
+                        socket,
+                      );
+                    }}
+                  />
                 </Tab>
               );
             })}

@@ -4,63 +4,66 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
-generator client {
-  provider = "prisma-client-js"
-  // output   = "../generated/prisma"
-}
+// generator client {
+//   provider = "prisma-client-js"
+//   output   = "../../shared/src/prisma-generated"
+// }
+
 generator types {
   provider = "prisma-generator-typescript-interfaces"
-  output   = "../../client/src/types/prisma.ts"
+  output   = "../../shared/src/generated/prisma.ts"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-enum MessageState{
+enum MessageState {
   SENT
   DELIVERED
   READ
 }
 
 model User {
-  id        String      @id @default(cuid(2))
-  email     String   @unique
-  password  String
-  name String?
-  lastName String?
-  createdAt DateTime @default(now())
+  id            String          @id @default(cuid(2))
+  email         String          @unique
+  password      String
+  name          String?
+  lastName      String?
+  createdAt     DateTime        @default(now())
   RefreshTokens RefreshTokens[]
 
-  profile Profile?
-  sentMessages     Message[]  @relation("SentMessages")
-  receivedMessages Message[]  @relation("ReceivedMessages")
+  profile          Profile?
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 }
 
-model Profile{
-  id String @id @default(cuid(2))
-  name String?
+model Profile {
+  id      String  @id @default(cuid(2))
+  name    String?
   surname String?
-  photo String?
-  userId String @unique
-  user User @relation(fields: [userId], references: [id])
+  photo   String?
+  userId  String  @unique
+  user    User    @relation(fields: [userId], references: [id])
+}
 
-}
-model RefreshTokens{
-  id String @id @default(cuid(2))
-  token String @unique
+model RefreshTokens {
+  id        String   @id @default(cuid(2))
+  token     String   @unique
   createdAt DateTime @default(now())
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: NoAction)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: NoAction)
 }
-model Message{
-  id String @id @default(cuid(2))
-  text String
-  senderEmail String
+
+model Message {
+  id             String       @id @default(cuid(2))
+  text           String
+  senderEmail    String
   recipientEmail String
-  sender User @relation("SentMessages",fields: [senderEmail],references: [email])
-  recipient User @relation("ReceivedMessages",fields: [recipientEmail],references: [email])
-  createdAt DateTime @default(now())
-  readAt DateTime?
-  state MessageState @default(SENT)
+  sender         User         @relation("SentMessages", fields: [senderEmail], references: [email])
+  recipient      User         @relation("ReceivedMessages", fields: [recipientEmail], references: [email])
+  createdAt      DateTime     @default(now())
+  readAt         DateTime?
+  state          MessageState @default(SENT)
 }

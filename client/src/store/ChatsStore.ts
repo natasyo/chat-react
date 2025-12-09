@@ -1,16 +1,27 @@
-import type { User } from '../types/prisma.ts';
+import type { Message, User } from '@chat/shared';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 type ChatUser = { user: User; isOnline?: boolean };
 
-type ChatState = {
+export type ChatMessages = {
+  messages: Message[];
+  hasMore?: boolean;
+  nextCursor?: string;
+};
+
+export type ChatState = {
   users: { user: User; isOnline?: boolean }[];
   activeRecipient?: User;
   changeActiveRecipient: (user: User) => void;
-  addUser: (user: User) => void;
+  addUser: (user: User) => void; //добавление вкладок tabs
   removeUser: (user: User) => void;
   changeOnline: (users: ChatUser[]) => void;
+  messagesData: Map<string, ChatMessages[]>;
+  setMessagesData: (
+    recipientEmail: string,
+    newMessages: ChatMessages[],
+  ) => void;
 };
 
 export const useChatStore = create<ChatState>()(
@@ -18,6 +29,7 @@ export const useChatStore = create<ChatState>()(
     (set, get) => {
       return {
         users: [],
+        messages: [],
         addUser: (user: User) => {
           const users = get().users;
           if (users.some((u) => u.user.id === user.id))
@@ -71,6 +83,27 @@ export const useChatStore = create<ChatState>()(
           set((state) => ({
             ...state,
             activeRecipient: user,
+          }));
+        },
+        setMessagesData: (
+          recipientEmail: string,
+          newMessages: ChatMessages[],
+        ) => {
+          const msgAllUser = get().messagesData;
+          const messagesCurrentUser = [
+            ...[msgAllUser.get(recipientEmail)],
+            ...newMessages,
+          ];
+          msgAllUser.set(
+            recipientEmail,
+            messagesCurrentUser && [],
+          );
+
+          set((state) => ({
+            ...state,
+            messagesData: new Map<string, ChatMessages[]>(
+              msgAllUser,
+            ),
           }));
         },
       };

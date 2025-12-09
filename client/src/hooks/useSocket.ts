@@ -1,7 +1,7 @@
 import type { AuthState } from '../store/AuthStore.ts';
 import { useEffect, useState } from 'react';
 import { connectSocket } from '../functions/socket.ts';
-import type { Message } from '../types/prisma.ts';
+import type { Message } from '@chat/shared';
 import { useChatStore } from '../store/ChatsStore.ts';
 import { useUsers } from '../store/UsersStore.ts';
 import { useSocketStore } from '../store/SocketStore.ts';
@@ -23,8 +23,6 @@ export function useSocket(authStore: AuthState) {
       setMessages((prev) => [...prev, data]);
     });
     newSocket?.on('set_status_read', (data: Message) => {
-      // newSocket?.emit('get_private_message', data);
-      // const msg=messages.find(item=>item.email===data.)
       setPrivateMessages((prev) =>
         prev.map((msg) =>
           msg.id === data.id

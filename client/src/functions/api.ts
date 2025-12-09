@@ -1,5 +1,5 @@
 import axios, { type AxiosError } from 'axios';
-import type { Profile } from '../types/prisma.ts';
+import type { Profile } from '@chat/shared';
 import { useAuthStore } from '../store/AuthStore.ts';
 import { SERVER_URL } from '../../config.ts';
 
