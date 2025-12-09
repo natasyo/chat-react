@@ -1,0 +1,11 @@
+{
+  "private": "true",
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
